@@ -97,6 +97,22 @@ const Utils = {
      * @param {string} tipo - Tipo de mensaje ('success', 'error', 'info', 'warning')
      */
     mostrarMensaje: function(mensaje, tipo = 'info') {
+
+
+
+        const alertas = alertContainer.querySelectorAll('.alert');
+        if (alertas.length > 3) {
+            alertas[0].remove(); // Eliminar la alerta más antigua
+        }
+
+
+
+
+
+
+
+
+
         // Verificar si existe el contenedor de alertas, sino crearlo
         let alertContainer = document.getElementById('alertContainer');
         

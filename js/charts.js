@@ -12,6 +12,14 @@ const Charts = {
         const canvas = document.getElementById(canvasId);
         if (!canvas) return null;
         
+        // Verificar que el contexto 2d es accesible
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.error(`No se pudo obtener el contexto 2D para ${canvasId}`);
+            return null;
+        }
+
+        
         // Destruir gráfico existente si hay uno
         this.destruirGraficoExistente(canvas);
         

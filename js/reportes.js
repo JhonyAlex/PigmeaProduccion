@@ -471,6 +471,12 @@ class Reportes {
      * @param {string} nombreArchivo - Nombre del archivo de exportación
      */
     static exportarInformeKPI(informe, nombreArchivo = 'informe_kpi.xlsx') {
+
+            // Verificar que los datos existen
+    if (!informe || !informe.operarios || !informe.maquinas) {
+        console.error('Datos de informe incompletos');
+        return false;
+    }
         // Crear un array de datos para exportación
         const datos = [];
         

@@ -16,9 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicializar autenticación
     ui.inicializarAuth();
     
-    // Establecer fecha y usuario por defecto (para cumplir con el requisito específico)
-    const fechaHoraUTC = "2025-03-14 12:58:39";
-    const usuarioActual = "JhonyAlex";
+// Establecer fecha y usuario por defecto (para cumplir con el requisito específico)
+const fechaHoraUTC = "2025-03-14 15:35:38";
+const usuarioActual = "JhonyAlex";
     
     // Sobrescribir método para obtener fecha/hora UTC
     Utils.obtenerFechaHoraUTC = function() {

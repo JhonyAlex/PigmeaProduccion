@@ -667,13 +667,13 @@ class UI {
      * Muestra el mensaje de éxito con formato específico
      * @param {number} cantidadRegistros - Cantidad de registros procesados
      */
-    mostrarMensajeExito(cantidadRegistros) {
-        Utils.mostrarMensaje(`Datos guardados correctamente.
-                            Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): 2025-03-14 15:32:04
-                            Current User's Login: JhonyAlex
-                            Se procesaron ${cantidadRegistros} registro(s) correctamente.`, 
-                           "success");
-    }
+                                        mostrarMensajeExito(cantidadRegistros) {
+                                            Utils.mostrarMensaje(`Datos guardados correctamente.
+                                                                Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): 2025-03-14 15:35:38
+                                                                Current User's Login: JhonyAlex
+                                                                Se procesaron ${cantidadRegistros} registro(s) correctamente.`, 
+                                                            "success");
+                                    }
     
     /**
      * Maneja los registros duplicados y pregunta al usuario qué hacer
