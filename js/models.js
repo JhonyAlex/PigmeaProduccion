@@ -25,7 +25,7 @@ class Registro {
         bandas = 0,
         maquina = ""
     ) {
-        this.id = id || crypto.randomUUID();
+        this.id = id || window.crypto.randomUUID();
         this.fecha = fecha instanceof Date ? fecha : new Date(fecha);
         this.numPedido = numPedido;
         this.dia = dia || this.getDiaSemana(this.fecha);

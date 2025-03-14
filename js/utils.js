@@ -9,7 +9,7 @@ const Utils = {
      * @param {string} formato - Formato deseado ('fecha', 'hora', 'fechaHora', 'iso')
      * @returns {string} Fecha formateada
      */
-    formatoFecha: function(fecha, formato = 'fecha') {
+    formatoFecha: function(fecha, formato = 'iso') {
         if (!fecha) return '';
         
         // Convertir a objeto Date si es un string
