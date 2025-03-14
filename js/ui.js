@@ -1,825 +1,738 @@
+/**
+ * Gestión de la interfaz de usuario
+ */
+class UI {
+    constructor() {
+        // Referencias a elementos de la interfaz
+        this.sections = {
+            auth: document.getElementById('authSection'),
+            dashboard: document.getElementById('dashboardSection'),
+            registro: document.getElementById('registroSection'),
+            baseDatos: document.getElementById('baseDatosSection'),
+            reportes: document.getElementById('reportesSection'),
+            configuracion: document.getElementById('configuracionSection')
+        };
+        
+        // Referencias a elementos de navegación
+        this.navLinks = document.querySelectorAll('.navbar-nav .nav-link[data-section]');
+        
+        // Paginación para tabla de datos
+        this.paginaActual = 1;
+        this.registrosPorPagina = 50;
+        this.datosFiltrados = [];
+        this.columnaOrden = 'fecha';
+        this.ordenAscendente = false;
+        
+        // Fecha y usuario específicos
+        this.fechaHoraUTC = "2025-03-14 15:29:20";
+        this.usuarioActual = "JhonyAlex";
+        
+        // Inicializar evento para navegación
+        this.inicializarNavegacion();
+    }
+    
     /**
-     * Cuenta pedidos por año
-     * @param {Array} registros - Lista de registros
-     * @param {Map} mapaPedidos - Mapa para contar pedidos
+     * Inicializa los eventos de navegación entre secciones
      */
-    contarPedidosPorAnio(registros, mapaPedidos) {
-        registros.forEach(registro => {
-            const operario = registro.operario;
-            const maquina = registro.maquina;
-            
-            if (operario && maquina && mapaPedidos.has(operario) && mapaPedidos.get(operario).has(maquina)) {
-                const fecha = new Date(registro.fecha);
-                const anioStr = `${fecha.getFullYear()}`;
-                const clave = `${anioStr}_${operario}_${maquina}`;
+    inicializarNavegacion() {
+        this.navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const seccion = link.getAttribute('data-section');
+                this.mostrarSeccion(seccion);
                 
-                // Verificar si ya contamos este pedido para este año, operario y máquina
-                if (!this.pedidosContados) this.pedidosContados = new Set();
-                
-                if (!this.pedidosContados.has(clave)) {
-                    mapaPedidos.get(operario).set(
-                        maquina, 
-                        mapaPedidos.get(operario).get(maquina) + 1
-                    );
-                    this.pedidosContados.add(clave);
-                }
-            }
-        });
-        
-        // Limpiar el conjunto de pedidos contados
-        this.pedidosContados = null;
-    }
-    
-    /**
-     * Cuenta pedidos por operario
-     * @param {Array} registros - Lista de registros
-     * @param {Map} mapaPedidos - Mapa para contar pedidos
-     */
-    contarPedidosPorOperario(registros, mapaPedidos) {
-        registros.forEach(registro => {
-            const operario = registro.operario;
-            const maquina = registro.maquina;
-            
-            if (operario && maquina && mapaPedidos.has(operario) && mapaPedidos.get(operario).has(maquina)) {
-                mapaPedidos.get(operario).set(
-                    maquina, 
-                    mapaPedidos.get(operario).get(maquina) + 1
-                );
-            }
-        });
-    }
-    
-    /**
-     * Cuenta pedidos por turno
-     * @param {Array} registros - Lista de registros
-     * @param {Map} mapaPedidos - Mapa para contar pedidos
-     */
-    contarPedidosPorTurno(registros, mapaPedidos) {
-        registros.forEach(registro => {
-            const operario = registro.operario;
-            const maquina = registro.maquina;
-            
-            if (operario && maquina && mapaPedidos.has(operario) && mapaPedidos.get(operario).has(maquina)) {
-                const turno = registro.turno;
-                const clave = `${turno}_${operario}_${maquina}`;
-                
-                // Verificar si ya contamos este pedido para este turno, operario y máquina
-                if (!this.pedidosContados) this.pedidosContados = new Set();
-                
-                if (!this.pedidosContados.has(clave)) {
-                    mapaPedidos.get(operario).set(
-                        maquina, 
-                        mapaPedidos.get(operario).get(maquina) + 1
-                    );
-                    this.pedidosContados.add(clave);
-                }
-            }
-        });
-        
-        // Limpiar el conjunto de pedidos contados
-        this.pedidosContados = null;
-    }
-    
-    /**
-     * Cuenta pedidos por tipo
-     * @param {Array} registros - Lista de registros
-     * @param {Map} mapaPedidos - Mapa para contar pedidos
-     */
-    contarPedidosPorTipo(registros, mapaPedidos) {
-        registros.forEach(registro => {
-            const operario = registro.operario;
-            const maquina = registro.maquina;
-            
-            if (operario && maquina && mapaPedidos.has(operario) && mapaPedidos.get(operario).has(maquina)) {
-                const tipo = registro.tipo;
-                const clave = `${tipo}_${operario}_${maquina}`;
-                
-                // Verificar si ya contamos este pedido para este tipo, operario y máquina
-                if (!this.pedidosContados) this.pedidosContados = new Set();
-                
-                if (!this.pedidosContados.has(clave)) {
-                    mapaPedidos.get(operario).set(
-                        maquina, 
-                        mapaPedidos.get(operario).get(maquina) + 1
-                    );
-                    this.pedidosContados.add(clave);
-                }
-            }
-        });
-        
-        // Limpiar el conjunto de pedidos contados
-        this.pedidosContados = null;
-    }
-    
-    /**
-     * Genera los gráficos para la sección de reportes
-     * @param {Array} registros - Lista de registros
-     * @param {string} agrupacion - Tipo de agrupación
-     */
-    generarGraficosReportes(registros, agrupacion) {
-        // Generar gráfico de producción por operario
-        Charts.crearGraficoProduccionPorOperario('produccionPorOperarioChart', registros, agrupacion);
-        
-        // Generar gráfico de producción por tipo
-        Charts.crearGraficoProduccionPorTipo('produccionPorTipoChart', registros);
-    }
-    
-    /**
-     * Exporta el reporte actual
-     */
-    exportarReporteActual() {
-        // Obtener datos de la tabla de asesores
-        const tabla = document.getElementById('tablaAsesores');
-        const filas = tabla.querySelectorAll('tbody tr');
-        const datos = [];
-        
-        // Obtener encabezados
-        const encabezados = [];
-        tabla.querySelectorAll('thead th').forEach(th => {
-            encabezados.push(th.textContent);
-        });
-        
-        // Procesar cada fila
-        filas.forEach(fila => {
-            const filaDatos = {};
-            fila.querySelectorAll('td').forEach((td, index) => {
-                filaDatos[encabezados[index]] = td.textContent;
-            });
-            datos.push(filaDatos);
-        });
-        
-        // Añadir totales
-        const totales = {};
-        tabla.querySelectorAll('tfoot th').forEach((th, index) => {
-            if (index > 0) { // Omitir la primera celda que dice "TOTALES"
-                totales[encabezados[index]] = th.textContent;
-            } else {
-                totales[encabezados[index]] = "TOTALES";
-            }
-        });
-        datos.push(totales);
-        
-        // Obtener parámetros del reporte para el nombre del archivo
-        const desde = document.getElementById('reporteDesde').value;
-        const hasta = document.getElementById('reporteHasta').value;
-        const nombreArchivo = `reporte_produccion_${desde}_${hasta}.xlsx`;
-        
-        // Exportar a Excel
-        Utils.exportarExcel(datos, nombreArchivo);
-    }
-    
-    /**
-     * Inicializa la sección de configuración
-     */
-    inicializarConfiguracion() {
-        // Cargar operarios
-        this.cargarTablaOperarios();
-        
-        // Cargar máquinas
-        this.cargarTablaMaquinas();
-        
-        // Asignar eventos
-        document.getElementById('operarioForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.agregarOperario();
-        });
-        
-        document.getElementById('maquinaForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.agregarMaquina();
-        });
-        
-        document.getElementById('btnExportarTodo').addEventListener('click', () => {
-            this.exportarTodosDatos();
-        });
-        
-        document.getElementById('btnImportarTodo').addEventListener('click', () => {
-            this.importarTodosDatos();
-        });
-        
-        document.getElementById('btnLimpiarRegistros').addEventListener('click', () => {
-            this.limpiarRegistrosAntiguos();
-        });
-        
-        document.getElementById('btnReiniciarSistema').addEventListener('click', () => {
-            this.reiniciarSistema();
-        });
-    }
-    
-    /**
-     * Carga la tabla de operarios
-     */
-    cargarTablaOperarios() {
-        const tabla = document.getElementById('tablaOperarios').querySelector('tbody');
-        tabla.innerHTML = '';
-        
-        const operarios = Storage.getOperarios();
-        
-        if (operarios.length === 0) {
-            const fila = document.createElement('tr');
-            fila.innerHTML = '<td colspan="2" class="text-center">No hay operarios registrados</td>';
-            tabla.appendChild(fila);
-        } else {
-            operarios.forEach(operario => {
-                const fila = document.createElement('tr');
-                
-                fila.innerHTML = `
-                    <td>${operario.nombre}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-danger btnEliminarOperario" data-id="${operario.id}">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                `;
-                
-                tabla.appendChild(fila);
-            });
-            
-            // Asignar evento para eliminar operario
-            document.querySelectorAll('.btnEliminarOperario').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const id = btn.getAttribute('data-id');
-                    this.eliminarOperario(id);
-                });
-            });
-        }
-    }
-    
-    /**
-     * Carga la tabla de máquinas
-     */
-    cargarTablaMaquinas() {
-        const tabla = document.getElementById('tablaMaquinas').querySelector('tbody');
-        tabla.innerHTML = '';
-        
-        const maquinas = Storage.getMaquinas();
-        
-        if (maquinas.length === 0) {
-            const fila = document.createElement('tr');
-            fila.innerHTML = '<td colspan="2" class="text-center">No hay máquinas registradas</td>';
-            tabla.appendChild(fila);
-        } else {
-            maquinas.forEach(maquina => {
-                const fila = document.createElement('tr');
-                
-                fila.innerHTML = `
-                    <td>${maquina.nombre}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-danger btnEliminarMaquina" data-id="${maquina.id}">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                `;
-                
-                tabla.appendChild(fila);
-            });
-            
-            // Asignar evento para eliminar máquina
-            document.querySelectorAll('.btnEliminarMaquina').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const id = btn.getAttribute('data-id');
-                    this.eliminarMaquina(id);
-                });
-            });
-        }
-    }
-    
-    /**
-     * Agrega un operario
-     */
-    agregarOperario() {
-        const nombreInput = document.getElementById('nombreOperario');
-        const nombre = nombreInput.value.trim();
-        
-        if (!nombre) {
-            Utils.mostrarMensaje("Por favor ingresa un nombre para el operario", "warning");
-            return;
-        }
-        
-        const operario = new Operario(null, nombre);
-        
-        if (Storage.agregarOperario(operario)) {
-            nombreInput.value = '';
-            this.cargarTablaOperarios();
-            Utils.mostrarMensaje("Operario agregado correctamente", "success");
-            
-            // Recargar listas de operarios en toda la aplicación
-            this.actualizarListasOperarios();
-        } else {
-            Utils.mostrarMensaje("Error al agregar operario. Nombre duplicado.", "error");
-        }
-    }
-    
-    /**
-     * Elimina un operario
-     * @param {string} id - ID del operario
-     */
-    eliminarOperario(id) {
-        Utils.confirmarAccion(
-            "¿Estás seguro de que deseas eliminar este operario? Esta acción no se puede deshacer.",
-            "Eliminar Operario",
-            () => {
-                if (Storage.eliminarOperario(id)) {
-                    this.cargarTablaOperarios();
-                    Utils.mostrarMensaje("Operario eliminado correctamente", "success");
-                    
-                    // Recargar listas de operarios en toda la aplicación
-                    this.actualizarListasOperarios();
-                } else {
-                    Utils.mostrarMensaje("Error al eliminar operario", "error");
-                }
-            }
-        );
-    }
-    
-    /**
-     * Agrega una máquina
-     */
-    agregarMaquina() {
-        const nombreInput = document.getElementById('nombreMaquina');
-        const nombre = nombreInput.value.trim();
-        
-        if (!nombre) {
-            Utils.mostrarMensaje("Por favor ingresa un nombre para la máquina", "warning");
-            return;
-        }
-        
-        const maquina = new Maquina(null, nombre);
-        
-        if (Storage.agregarMaquina(maquina)) {
-            nombreInput.value = '';
-            this.cargarTablaMaquinas();
-            Utils.mostrarMensaje("Máquina agregada correctamente", "success");
-            
-            // Recargar listas de máquinas en toda la aplicación
-            this.actualizarListasMaquinas();
-        } else {
-            Utils.mostrarMensaje("Error al agregar máquina. Nombre duplicado.", "error");
-        }
-    }
-    
-    /**
-     * Elimina una máquina
-     * @param {string} id - ID de la máquina
-     */
-    eliminarMaquina(id) {
-        Utils.confirmarAccion(
-            "¿Estás seguro de que deseas eliminar esta máquina? Esta acción no se puede deshacer.",
-            "Eliminar Máquina",
-            () => {
-                if (Storage.eliminarMaquina(id)) {
-                    this.cargarTablaMaquinas();
-                    Utils.mostrarMensaje("Máquina eliminada correctamente", "success");
-                    
-                    // Recargar listas de máquinas en toda la aplicación
-                    this.actualizarListasMaquinas();
-                } else {
-                    Utils.mostrarMensaje("Error al eliminar máquina", "error");
-                }
-            }
-        );
-    }
-    
-    /**
-     * Actualiza todas las listas de operarios en la aplicación
-     */
-    actualizarListasOperarios() {
-        const operarios = Storage.getOperarios();
-        
-        // Lista en registro
-        const selectOperarioReg = document.getElementById('operario');
-        if (selectOperarioReg) {
-            const valorActual = selectOperarioReg.value;
-            selectOperarioReg.innerHTML = '<option value="">Seleccionar...</option>';
-            
-            operarios.forEach(operario => {
-                const option = document.createElement('option');
-                option.value = operario.nombre;
-                option.textContent = operario.nombre;
-                selectOperarioReg.appendChild(option);
-            });
-            
-            selectOperarioReg.value = valorActual;
-        }
-        
-        // Lista en filtros de base de datos
-        const selectOperarioFiltro = document.getElementById('filtroOperario');
-        if (selectOperarioFiltro) {
-            const valorActual = selectOperarioFiltro.value;
-            selectOperarioFiltro.innerHTML = '<option value="">Todos los Operarios</option>';
-            
-            operarios.forEach(operario => {
-                const option = document.createElement('option');
-                option.value = operario.nombre;
-                option.textContent = operario.nombre;
-                selectOperarioFiltro.appendChild(option);
-            });
-            
-            selectOperarioFiltro.value = valorActual;
-        }
-        
-        // Lista en reportes
-        const selectOperarioReporte = document.getElementById('reporteOperario');
-        if (selectOperarioReporte) {
-            const valorActual = selectOperarioReporte.value;
-            selectOperarioReporte.innerHTML = '<option value="">Todos</option>';
-            
-            operarios.forEach(operario => {
-                const option = document.createElement('option');
-                option.value = operario.nombre;
-                option.textContent = operario.nombre;
-                selectOperarioReporte.appendChild(option);
-            });
-            
-            selectOperarioReporte.value = valorActual;
-        }
-    }
-    
-    /**
-     * Actualiza todas las listas de máquinas en la aplicación
-     */
-    actualizarListasMaquinas() {
-        const maquinas = Storage.getMaquinas();
-        
-        // Actualizar todas las listas de máquinas en los registros
-        const diasSemana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
-        diasSemana.forEach(dia => {
-            const contenedor = document.getElementById(`registros-${dia}`);
-            if (!contenedor) return;
-            
-            const filas = contenedor.querySelectorAll('.registro-item');
-            filas.forEach((fila, index) => {
-                const numFila = index + 1;
-                const selectMaquina = document.getElementById(`${dia}-maquina-${numFila}`);
-                
-                if (selectMaquina) {
-                    const valorActual = selectMaquina.value;
-                    selectMaquina.innerHTML = '<option value="">Seleccionar máquina...</option>';
-                    
-                    maquinas.forEach(maquina => {
-                        const option = document.createElement('option');
-                        option.value = maquina.nombre;
-                        option.textContent = maquina.nombre;
-                        selectMaquina.appendChild(option);
-                    });
-                    
-                    selectMaquina.value = valorActual;
-                }
+                // Marcar el enlace activo
+                this.navLinks.forEach(item => item.classList.remove('active-section'));
+                link.classList.add('active-section');
             });
         });
     }
     
     /**
-     * Exporta todos los datos del sistema
+     * Muestra una sección específica y oculta las demás
+     * @param {string} seccion - Nombre de la sección a mostrar
      */
-    exportarTodosDatos() {
-        const datos = Storage.exportarTodo();
-        
-        if (datos) {
-            // Crear blob y descargar
-            const blob = new Blob([datos], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            
-            // Crear nombre de archivo con fecha actual
-            const fecha = new Date().toISOString().split('T')[0];
-            const nombreArchivo = `backup_produccion_${fecha}.json`;
-            
-            link.href = url;
-            link.download = nombreArchivo;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            Utils.mostrarMensaje("Datos exportados correctamente", "success");
-        } else {
-            Utils.mostrarMensaje("Error al exportar datos", "error");
-        }
-    }
-    
-    /**
-     * Importa todos los datos del sistema
-     */
-    importarTodosDatos() {
-        const fileInput = document.getElementById('importFile');
-        const reemplazar = document.getElementById('reemplazarDatos').checked;
-        
-        if (fileInput.files.length === 0) {
-            Utils.mostrarMensaje("Por favor selecciona un archivo para importar", "warning");
-            return;
-        }
-        
-        // Verificar extensión
-        const archivo = fileInput.files[0];
-        if (!archivo.name.toLowerCase().endsWith('.json')) {
-            Utils.mostrarMensaje("El archivo debe tener extensión .json", "error");
-            return;
-        }
-        
-        // Confirmar antes de importar
-        Utils.confirmarAccion(
-            `¿Estás seguro de que deseas ${reemplazar ? 'reemplazar todos' : 'importar'} los datos? ${reemplazar ? 'Esta acción no se puede deshacer.' : ''}`,
-            "Importar Datos",
-            () => {
-                const reader = new FileReader();
-                
-                reader.onload = (e) => {
-                    try {
-                        const contenido = e.target.result;
-                        
-                        if (Storage.importarTodo(contenido, reemplazar)) {
-                            Utils.mostrarMensaje("Datos importados correctamente", "success");
-                            
-                            // Recargar interfaces
-                            this.cargarTablaOperarios();
-                            this.cargarTablaMaquinas();
-                            this.actualizarListasOperarios();
-                            this.actualizarListasMaquinas();
-                            
-                            // Limpiar input
-                            fileInput.value = '';
-                            document.getElementById('reemplazarDatos').checked = false;
-                        } else {
-                            Utils.mostrarMensaje("Error al importar datos. Formato incorrecto.", "error");
-                        }
-                    } catch (error) {
-                        console.error('Error al leer el archivo:', error);
-                        Utils.mostrarMensaje("Error al leer el archivo", "error");
-                    }
-                };
-                
-                reader.readAsText(archivo);
-            }
-        );
-    }
-    
-    /**
-     * Limpia registros antiguos del sistema
-     */
-    limpiarRegistrosAntiguos() {
-        Utils.confirmarAccion(
-            "¿Cuántos meses de registros deseas mantener? Los registros más antiguos serán eliminados.",
-            "Limpiar Registros Antiguos",
-            () => {
-                // Crear un input para que el usuario ingrese el número de meses
-                const modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
-                const modalBody = document.getElementById('confirmBody');
-                
-                modalBody.innerHTML = `
-                    <p>¿Cuántos meses de registros deseas mantener? Los registros más antiguos serán eliminados.</p>
-                    <div class="mb-3">
-                        <input type="number" class="form-control" id="mesesConservar" min="1" value="6">
-                    </div>
-                `;
-                
-                // Configurar el botón de confirmar
-                const btnConfirmar = document.getElementById('btnConfirmar');
-                const oldHandler = btnConfirmar.onclick;
-                
-                btnConfirmar.onclick = () => {
-                    const meses = parseInt(document.getElementById('mesesConservar').value) || 6;
-                    this.ejecutarLimpiezaRegistros(meses);
-                    modal.hide();
-                    
-                    // Restaurar manejador original
-                    setTimeout(() => {
-                        modalBody.innerHTML = "¿Estás seguro de que deseas continuar?";
-                        btnConfirmar.onclick = oldHandler;
-                    }, 500);
-                };
-            }
-        );
-    }
-    
-    /**
-     * Ejecuta la limpieza de registros antiguos
-     * @param {number} meses - Número de meses a conservar
-     */
-    ejecutarLimpiezaRegistros(meses) {
-        // Calcular la fecha límite
-        const fechaLimite = new Date();
-        fechaLimite.setMonth(fechaLimite.getMonth() - meses);
-        
-        // Obtener registros
-        const registros = Storage.getRegistros();
-        const registrosAConservar = registros.filter(registro => 
-            new Date(registro.fecha) >= fechaLimite
-        );
-        
-        // Guardar los registros a conservar
-        if (Storage.guardarRegistros(registrosAConservar)) {
-            const eliminados = registros.length - registrosAConservar.length;
-            Utils.mostrarMensaje(`Se eliminaron ${eliminados} registros anteriores a ${Utils.formatoFecha(fechaLimite)}`, "success");
-        } else {
-            Utils.mostrarMensaje("Error al limpiar registros", "error");
-        }
-    }
-    
-    /**
-     * Reinicia el sistema completo
-     */
-    reiniciarSistema() {
-        Utils.confirmarAccion(
-            "¿Estás seguro de que deseas reiniciar completamente el sistema? Todos los datos serán eliminados y esta acción no se puede deshacer.",
-            "Reiniciar Sistema",
-            () => {
-                if (Storage.reiniciarSistema()) {
-                    Utils.mostrarMensaje("El sistema ha sido reiniciado correctamente", "success");
-                    
-                    // Inicializar datos de demostración
-                    Storage.inicializarDatosDemostracion();
-                    
-                    // Recargar interfaces
-                    this.cargarTablaOperarios();
-                    this.cargarTablaMaquinas();
-                    this.actualizarListasOperarios();
-                    this.actualizarListasMaquinas();
-                    
-                    // Mostrar el dashboard
-                    this.mostrarSeccion('dashboard');
-                } else {
-                    Utils.mostrarMensaje("Error al reiniciar el sistema", "error");
-                }
-            }
-        );
-    }
-    
-    /**
-     * Muestra modal para importar datos
-     */
-    mostrarModalImportarDatos() {
-        // En este caso usamos el input file ya presente en la página
-        // Solo mostramos un mensaje recordando el formato
-        Utils.mostrarMensaje("Selecciona un archivo .json generado por este sistema para importar datos", "info");
-    }
-    
-    /**
-     * Inicializa la autenticación de usuario
-     */
-    inicializarAuth() {
-        // Verificar si hay sesión activa
-        if (Storage.verificarSesion()) {
-            const sesion = Storage.getSesion();
-            if (sesion) {
-                // Mostrar nombre de usuario
-                document.getElementById('currentUser').textContent = sesion.username;
-                
-                // Mostrar dashboard
-                this.mostrarSeccion('dashboard');
-                return;
-            }
-        }
-        
-        // Si no hay sesión, mostrar formulario de login
-        this.mostrarSeccionAuth();
-        
-        // Configurar eventos para formularios de auth
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.procesarLogin();
-        });
-        
-        document.getElementById('registerForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.procesarRegistro();
-        });
-        
-        // Evento para cerrar sesión
-        document.getElementById('btnLogout').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.cerrarSesion();
-        });
-    }
-    
-    /**
-     * Muestra la sección de autenticación
-     */
-    mostrarSeccionAuth() {
+    mostrarSeccion(seccion) {
         // Ocultar todas las secciones
         Object.values(this.sections).forEach(section => {
             if (section) section.classList.add('d-none');
         });
         
-        // Mostrar sección de autenticación
-        this.sections.auth.classList.remove('d-none');
-    }
-    
-    /**
-     * Procesa el formulario de login
-     */
-    procesarLogin() {
-        const username = document.getElementById('loginUsername').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        
-        if (!username || !password) {
-            Utils.mostrarMensaje("Por favor completa todos los campos", "warning");
-            return;
-        }
-        
-        // Si es la primera ejecución y no hay usuarios, registrar al admin
-        if (Storage.getUsuarios().length === 0) {
-            const admin = new Usuario(
-                null, 
-                username, 
-                Usuario.hashPassword(password), 
-                "admin"
-            );
+        // Mostrar la sección solicitada
+        if (this.sections[seccion]) {
+            this.sections[seccion].classList.remove('d-none');
             
-            Storage.agregarUsuario(admin);
-            
-            // Inicializar datos de demostración
-            Storage.inicializarDatosDemostracion();
-            
-            // Guardar sesión y mostrar dashboard
-            Storage.guardarSesion(admin);
-            document.getElementById('currentUser').textContent = admin.username;
-            this.mostrarSeccion('dashboard');
-            
-            Utils.mostrarMensaje(`Bienvenido ${admin.username}. Se ha creado una cuenta de administrador para ti.`, "success");
-            return;
-        }
-        
-        // Verificar credenciales
-        const usuario = Storage.verificarCredenciales(username, password);
-        
-        if (usuario) {
-            // Guardar sesión y mostrar dashboard
-            Storage.guardarSesion(usuario);
-            document.getElementById('currentUser').textContent = usuario.username;
-            this.mostrarSeccion('dashboard');
-            
-            Utils.mostrarMensaje(`Bienvenido ${usuario.username}. 
-                                 Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): ${Utils.obtenerFechaHoraUTC()}
-                                 Current User's Login: ${usuario.username}`, "success");
-        } else {
-            Utils.mostrarMensaje("Credenciales incorrectas", "error");
+            // Acciones específicas según la sección
+            switch (seccion) {
+                case 'dashboard':
+                    this.actualizarDashboard();
+                    break;
+                case 'registro':
+                    this.inicializarRegistro();
+                    break;
+                case 'baseDatos':
+                    this.cargarTablaBaseDatos();
+                    break;
+                case 'reportes':
+                    this.inicializarReportes();
+                    break;
+                case 'configuracion':
+                    this.inicializarConfiguracion();
+                    break;
+            }
         }
     }
     
     /**
-     * Procesa el formulario de registro
+     * Actualiza los KPIs y gráficos del dashboard
      */
-    procesarRegistro() {
-        const username = document.getElementById('regUsername').value.trim();
-        const password = document.getElementById('regPassword').value;
-        const confirmPassword = document.getElementById('regConfirmPassword').value;
+    actualizarDashboard() {
+        // Obtener todos los registros
+        const registros = Storage.getRegistros();
         
-        if (!username || !password || !confirmPassword) {
-            Utils.mostrarMensaje("Por favor completa todos los campos", "warning");
+        // Actualizar KPIs principales
+        this.actualizarContadoresKPI(registros);
+        
+        // Cargar últimos pedidos
+        this.cargarUltimosPedidos(registros);
+        
+        // Inicializar gráficos
+        this.inicializarGraficosDashboard(registros);
+    }
+    
+    /**
+     * Actualiza los contadores de KPI en el dashboard
+     * @param {Array} registros - Lista de registros
+     */
+    actualizarContadoresKPI(registros) {
+        // Total de pedidos
+        document.getElementById('totalPedidos').textContent = registros.length;
+        
+        // Total de metros
+        const totalMetros = registros.reduce((sum, registro) => sum + parseFloat(registro.metros || 0), 0);
+        document.getElementById('totalMetros').textContent = Utils.formatoNumero(totalMetros);
+        
+        // Total de operarios únicos
+        const operariosUnicos = [...new Set(registros.map(r => r.operario).filter(Boolean))];
+        document.getElementById('totalOperarios').textContent = operariosUnicos.length;
+        
+        // Total de turnos únicos
+        const turnosUnicos = [...new Set(registros.map(r => r.turno).filter(Boolean))];
+        document.getElementById('totalTurnos').textContent = turnosUnicos.length;
+    }
+    
+    /**
+     * Carga la tabla de últimos pedidos en el dashboard
+     * @param {Array} registros - Lista de registros
+     */
+    cargarUltimosPedidos(registros) {
+        const tabla = document.getElementById('ultimosPedidosTable').querySelector('tbody');
+        if (!tabla) return; // Verificación añadida
+        
+        tabla.innerHTML = '';
+        
+        // Ordenar por fecha descendente y tomar los últimos 10
+        const ultimosRegistros = [...registros]
+            .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+            .slice(0, 10);
+        
+        ultimosRegistros.forEach(registro => {
+            const fila = document.createElement('tr');
+            
+            fila.innerHTML = `
+                <td>${Utils.formatoFecha(registro.fecha)}</td>
+                <td>${Utils.escaparHTML(registro.numPedido)}</td>
+                <td>${Utils.escaparHTML(registro.dia)}</td>
+                <td>${Utils.escaparHTML(registro.operario)}</td>
+                <td>${Utils.escaparHTML(registro.turno)}</td>
+                <td>${Utils.formatoNumero(registro.metros)}</td>
+                <td>${Utils.escaparHTML(registro.tipo)}</td>
+            `;
+            
+            tabla.appendChild(fila);
+        });
+    }
+    
+    /**
+     * Inicializa los gráficos del dashboard
+     * @param {Array} registros - Lista de registros
+     */
+    inicializarGraficosDashboard(registros) {
+        try {
+            // Configuración del gráfico de pedidos por semana
+            Charts.crearGraficoPedidosSemana('pedidosSemanaChart', registros);
+            
+            // Configuración del gráfico de metros por operario
+            Charts.crearGraficoMetrosPorOperario('metrosPorOperarioChart', registros);
+        } catch (error) {
+            console.error('Error al inicializar gráficos:', error);
+            Utils.mostrarMensaje('Error al cargar gráficos', 'error');
+        }
+    }
+    
+    /**
+     * Inicializa la sección de registro de producción
+     */
+    inicializarRegistro() {
+        try {
+            // Inicializar fecha base con la fecha actual (lunes de la semana actual)
+            const fechaActual = new Date();
+            const lunesSemana = Utils.obtenerInicioSemana(fechaActual);
+            
+            // Establecer la fecha base en el campo correspondiente
+            const fechaBaseInput = document.getElementById('fechaBase');
+            if (fechaBaseInput) {
+                fechaBaseInput.value = Utils.fechaParaInput(lunesSemana);
+            }
+            
+            // Cargar operarios en el select
+            const selectOperario = document.getElementById('operario');
+            if (selectOperario) {
+                selectOperario.innerHTML = '<option value="">Seleccionar...</option>';
+                
+                const operarios = Storage.getOperarios();
+                operarios.forEach(operario => {
+                    const option = document.createElement('option');
+                    option.value = operario.nombre;
+                    option.textContent = operario.nombre;
+                    selectOperario.appendChild(option);
+                });
+            }
+            
+            // Generar contenido para las pestañas de días
+            this.generarContenidoPestanasDias();
+            
+            // Asignar evento al botón de limpiar tabla
+            const btnLimpiarTabla = document.getElementById('btnLimpiarTabla');
+            if (btnLimpiarTabla) {
+                btnLimpiarTabla.addEventListener('click', () => {
+                    this.limpiarTablaRegistro();
+                });
+            }
+            
+            // Asignar evento al formulario de registro para guardar datos
+            const registroForm = document.getElementById('registroForm');
+            if (registroForm) {
+                registroForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.procesarFormularioRegistro();
+                });
+            }
+        } catch (error) {
+            console.error('Error al inicializar registro:', error);
+            Utils.mostrarMensaje('Error al inicializar el formulario de registro', 'error');
+        }
+    }
+    
+    /**
+     * Genera el contenido para las pestañas de días de la semana en el registro
+     */
+    generarContenidoPestanasDias() {
+        const diasSemana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+        const contenedor = document.getElementById('diasSemanaContent');
+        if (!contenedor) return; // Verificación añadida
+        
+        contenedor.innerHTML = '';
+        
+        diasSemana.forEach((dia, index) => {
+            // Crear el div de la pestaña
+            const tabPane = document.createElement('div');
+            tabPane.className = index === 0 ? 'tab-pane fade show active' : 'tab-pane fade';
+            tabPane.id = dia;
+            
+            // Título y fecha del día
+            let diaCapitalizado = dia.charAt(0).toUpperCase() + dia.slice(1);
+            if (dia === 'miercoles') diaCapitalizado = 'Miércoles';
+            if (dia === 'sabado') diaCapitalizado = 'Sábado';
+            
+            const fechaDia = this.calcularFechaDia(index + 1); // Lunes = 1, Domingo = 7
+            
+            // Crear tabla para los registros del día
+            const tabla = `
+            <div class="registro-dia">
+                <div class="row mb-3">
+                    <div class="col">
+                        <h5>${diaCapitalizado} - <span class="text-muted">${Utils.formatoFecha(fechaDia)}</span></h5>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-sm btn-outline-primary btnAgregarFila" data-dia="${dia}">
+                            <i class="fas fa-plus me-1"></i>Agregar Fila
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="registros-${dia}">
+                    <!-- Las filas se agregarán dinámicamente -->
+                    ${this.generarFilaRegistro(dia, 1)}
+                    ${this.generarFilaRegistro(dia, 2)}
+                    ${this.generarFilaRegistro(dia, 3)}
+                </div>
+            </div>
+            `;
+            
+            tabPane.innerHTML = tabla;
+            contenedor.appendChild(tabPane);
+            
+            // Asignar evento al botón de agregar fila
+            const btnAgregarFila = tabPane.querySelector('.btnAgregarFila');
+            if (btnAgregarFila) {
+                btnAgregarFila.addEventListener('click', () => {
+                    this.agregarFilaRegistro(dia);
+                });
+            }
+            
+            // Asignar eventos a botones de eliminar
+            this.asignarEventosEliminarFilas(dia);
+        });
+    }
+    
+    /**
+     * Asigna eventos a los botones de eliminar fila
+     * @param {string} dia - Nombre del día
+     */
+    asignarEventosEliminarFilas(dia) {
+        const contenedor = document.getElementById(`registros-${dia}`);
+        if (!contenedor) return;
+        
+        const botonesEliminar = contenedor.querySelectorAll('.btnEliminarFila');
+        botonesEliminar.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const numFila = btn.getAttribute('data-num');
+                if (numFila) {
+                    this.eliminarFilaRegistro(dia, numFila);
+                }
+            });
+        });
+    }
+    
+    /**
+     * Genera el HTML para una fila de registro
+     * @param {string} dia - Nombre del día
+     * @param {number} num - Número de fila
+     * @returns {string} HTML de la fila de registro
+     */
+    generarFilaRegistro(dia, num) {
+        return `
+        <div class="registro-item" id="${dia}-registro-${num}">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <strong>#${num}</strong>
+                        </div>
+                        <div class="col">
+                            <div class="form-floating mb-2">
+                                <input type="text" class="form-control" id="${dia}-numPedido-${num}" placeholder="Número de pedido">
+                                <label for="${dia}-numPedido-${num}">Número de pedido</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-floating mb-2">
+                        <input type="number" class="form-control" id="${dia}-metros-${num}" placeholder="Metros" min="0" step="0.01">
+                        <label for="${dia}-metros-${num}">Metros</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-floating mb-2">
+                        <input type="number" class="form-control" id="${dia}-bandas-${num}" placeholder="Bandas" min="0">
+                        <label for="${dia}-bandas-${num}">Bandas</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="${dia}-refilado-${num}">
+                        <label class="form-check-label" for="${dia}-refilado-${num}">
+                            Con refilado
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <select class="form-select" id="${dia}-tipo-${num}">
+                        <option value="">Tipo...</option>
+                        <option value="Monolámina">Monolámina (M)</option>
+                        <option value="Bicapa">Bicapa (B)</option>
+                        <option value="Tricapa">Tricapa (T)</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="form-floating">
+                        <input type="number" class="form-control" id="${dia}-barras-${num}" placeholder="Barras" min="0">
+                        <label for="${dia}-barras-${num}">Barras</label>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="${dia}-micro-${num}">
+                        <label class="form-check-label" for="${dia}-micro-${num}">
+                            Con micro
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <select class="form-select" id="${dia}-maquina-${num}">
+                        <option value="">Seleccionar máquina...</option>
+                        ${this.generarOpcionesMaquinas()}
+                    </select>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button type="button" class="btn btn-sm btn-outline-danger btnEliminarFila" data-dia="${dia}" data-num="${num}">
+                        <i class="fas fa-trash-alt me-1"></i>Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+        `;
+    }
+    
+    /**
+     * Genera las opciones HTML para el select de máquinas
+     * @returns {string} HTML con las opciones de máquinas
+     */
+    generarOpcionesMaquinas() {
+        const maquinas = Storage.getMaquinas();
+        if (!maquinas || maquinas.length === 0) return '';
+        
+        return maquinas.map(maquina => 
+            `<option value="${Utils.escaparHTML(maquina.nombre)}">${Utils.escaparHTML(maquina.nombre)}</option>`
+        ).join('');
+    }
+    
+    /**
+     * Agrega una nueva fila de registro para un día
+     * @param {string} dia - Nombre del día
+     */
+    agregarFilaRegistro(dia) {
+        const contenedor = document.getElementById(`registros-${dia}`);
+        if (!contenedor) return; // Verificación añadida
+        
+        // Encontrar el último número de fila
+        const filas = contenedor.querySelectorAll('.registro-item');
+        const nuevoNum = filas.length + 1;
+        
+        // Crear el elemento para la nueva fila
+        const nuevaFila = document.createElement('div');
+        nuevaFila.innerHTML = this.generarFilaRegistro(dia, nuevoNum);
+        
+        // Agregar la nueva fila al contenedor
+        contenedor.appendChild(nuevaFila.firstElementChild);
+        
+        // Asignar evento al botón de eliminar fila
+        const btnEliminar = contenedor.querySelector(`#${dia}-registro-${nuevoNum} .btnEliminarFila`);
+        if (btnEliminar) {
+            btnEliminar.addEventListener('click', () => {
+                this.eliminarFilaRegistro(dia, nuevoNum);
+            });
+        }
+    }
+    
+    /**
+     * Elimina una fila de registro
+     * @param {string} dia - Nombre del día
+     * @param {number} num - Número de fila a eliminar
+     */
+    eliminarFilaRegistro(dia, num) {
+        const fila = document.getElementById(`${dia}-registro-${num}`);
+        if (fila) {
+            fila.remove();
+        }
+    }
+    
+    /**
+     * Limpia la tabla de registro (mantiene la fecha base y operario)
+     */
+    limpiarTablaRegistro() {
+        Utils.confirmarAccion(
+            "¿Estás seguro de que deseas limpiar toda la tabla de registro?",
+            "Confirmar Limpieza",
+            () => {
+                try {
+                    // Mantener fecha, turno y operario
+                    const fechaBase = document.getElementById('fechaBase').value;
+                    const turno = document.getElementById('turno').value;
+                    const operario = document.getElementById('operario').value;
+                    
+                    // Regenerar contenido de pestañas
+                    this.generarContenidoPestanasDias();
+                    
+                    // Restaurar valores
+                    if (document.getElementById('fechaBase')) {
+                        document.getElementById('fechaBase').value = fechaBase;
+                    }
+                    if (document.getElementById('turno')) {
+                        document.getElementById('turno').value = turno;
+                    }
+                    if (document.getElementById('operario')) {
+                        document.getElementById('operario').value = operario;
+                    }
+                    
+                    Utils.mostrarMensaje("Tabla de registro limpiada correctamente.", "success");
+                } catch (error) {
+                    console.error('Error al limpiar tabla:', error);
+                    Utils.mostrarMensaje("Error al limpiar la tabla de registro", "error");
+                }
+            }
+        );
+    }
+    
+    /**
+     * Calcula la fecha para un día de la semana a partir de la fecha base
+     * @param {number} diaSemana - Número del día (1=lunes, 7=domingo)
+     * @returns {Date} Fecha calculada
+     */
+    calcularFechaDia(diaSemana) {
+        const fechaBaseInput = document.getElementById('fechaBase');
+        if (!fechaBaseInput || !fechaBaseInput.value) return new Date();
+        
+        const fechaBase = new Date(fechaBaseInput.value);
+        const result = new Date(fechaBase);
+        result.setDate(fechaBase.getDate() + diaSemana - 1);
+        return result;
+    }
+    
+    /**
+     * Procesa el formulario de registro y guarda los datos
+     */
+    procesarFormularioRegistro() {
+        try {
+            // Validar datos generales
+            const fechaBaseInput = document.getElementById('fechaBase');
+            const turnoInput = document.getElementById('turno');
+            const operarioInput = document.getElementById('operario');
+            
+            if (!fechaBaseInput || !turnoInput || !operarioInput) {
+                Utils.mostrarMensaje("Error: Faltan elementos del formulario", "error");
+                return;
+            }
+            
+            if (!fechaBaseInput.value || !turnoInput.value || !operarioInput.value) {
+                Utils.mostrarMensaje("Por favor completa los datos de fecha, turno y operario", "warning");
+                return;
+            }
+            
+            const fechaBase = new Date(fechaBaseInput.value);
+            const turno = turnoInput.value;
+            const operario = operarioInput.value;
+            
+            // Procesar cada día de la semana
+            const diasSemana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+            const nuevosRegistros = [];
+            const registrosExistentes = [];
+            
+            // Generar mapa de registros por día
+            const mapaRegistrosDia = new Map();
+            
+            diasSemana.forEach((dia, index) => {
+                const diaSemana = index + 1; // 1=lunes, 7=domingo
+                const fecha = this.calcularFechaDia(diaSemana);
+                
+                const nombreDia = Utils.nombreDiaSemana(fecha);
+                const contenedor = document.getElementById(`registros-${dia}`);
+                if (!contenedor) return; // Verificación añadida
+                
+                const filas = contenedor.querySelectorAll('.registro-item');
+                let cantPedidosDia = 0;
+                
+                filas.forEach((fila, filaIndex) => {
+                    const numFila = filaIndex + 1;
+                    const numPedidoInput = document.getElementById(`${dia}-numPedido-${numFila}`);
+                    if (!numPedidoInput) return; // Verificación añadida
+                    
+                    const numPedido = numPedidoInput.value.trim();
+                    
+                    // Si no hay número de pedido, saltar esta fila
+                    if (!numPedido) return;
+                    
+                    cantPedidosDia++;
+                    
+                    // Recoger los demás datos
+                    const metrosInput = document.getElementById(`${dia}-metros-${numFila}`);
+                    const bandasInput = document.getElementById(`${dia}-bandas-${numFila}`);
+                    const refiladoInput = document.getElementById(`${dia}-refilado-${numFila}`);
+                    const tipoInput = document.getElementById(`${dia}-tipo-${numFila}`);
+                    const barrasInput = document.getElementById(`${dia}-barras-${numFila}`);
+                    const microInput = document.getElementById(`${dia}-micro-${numFila}`);
+                    const maquinaInput = document.getElementById(`${dia}-maquina-${numFila}`);
+                    
+                    // Verificar elementos
+                    if (!metrosInput || !bandasInput || !refiladoInput || !tipoInput || !barrasInput || !microInput || !maquinaInput) {
+                        console.warn(`Faltan elementos para la fila ${numFila} del día ${dia}`);
+                        return;
+                    }
+                    
+                    const metros = parseFloat(metrosInput.value) || 0;
+                    const bandas = parseInt(bandasInput.value) || 0;
+                    const refilado = refiladoInput.checked ? "Con Refilado" : "Sin Refilado";
+                    const tipo = tipoInput.value;
+                    const barras = parseInt(barrasInput.value) || 0;
+                    const micro = microInput.checked ? "Con Micro" : "Sin Micro";
+                    const maquina = maquinaInput.value;
+                    
+                    // Crear objeto de registro
+                    const registro = new Registro(
+                        null,                   // id (se generará automáticamente)
+                        new Date(fecha),        // fecha
+                        numPedido,              // numPedido
+                        nombreDia,              // dia
+                        "",                     // mes (se calculará automáticamente)
+                        0,                      // semana (se calculará automáticamente)
+                        0,                      // semanaMes (se calculará automáticamente)
+                        turno,                  // turno
+                        operario,               // operario
+                        0,                      // cantPedidosDia (se actualizará después)
+                        metros,                 // metros
+                        0,                      // totalPedidosSemana (se actualizará después)
+                        0,                      // totalMetrosDia (se actualizará después)
+                        refilado,               // refilado
+                        tipo,                   // tipo
+                        barras,                 // barras
+                        micro,                  // micro
+                        bandas,                 // bandas
+                        maquina                 // maquina
+                    );
+                    
+                    // Verificar si ya existe un registro con este número de pedido
+                    const registrosExistentes = Storage.getRegistros();
+                    const registroExistente = registrosExistentes.find(r => r.numPedido === numPedido);
+                    
+                    if (registroExistente) {
+                        // Añadir a la lista de registros existentes para preguntar al usuario
+                        registrosExistentes.push({
+                            registro,
+                            existente: registroExistente
+                        });
+                    } else {
+                        nuevosRegistros.push(registro);
+                    }
+                    
+                    // Agregar al mapa de registros por día
+                    if (!mapaRegistrosDia.has(fecha.toDateString())) {
+                        mapaRegistrosDia.set(fecha.toDateString(), []);
+                    }
+                    mapaRegistrosDia.get(fecha.toDateString()).push(registro);
+                });
+            });
+            
+            // Actualizar cantidades por día y totales
+            mapaRegistrosDia.forEach((registrosDia, fechaStr) => {
+                const cantPedidosDia = registrosDia.length;
+                const totalMetrosDia = registrosDia.reduce((sum, r) => sum + r.metros, 0);
+                
+                registrosDia.forEach(registro => {
+                    registro.cantPedidosDia = cantPedidosDia;
+                    registro.totalMetrosDia = totalMetrosDia;
+                });
+            });
+            
+            // Calcular total de pedidos por semana
+            const semanaActual = Utils.obtenerInicioSemana(fechaBase).toDateString();
+            const registrosSemana = [...nuevosRegistros, ...registrosExistentes.map(r => r.registro)]
+                .filter(r => Utils.obtenerInicioSemana(r.fecha).toDateString() === semanaActual);
+            const totalPedidosSemana = registrosSemana.length;
+            
+            registrosSemana.forEach(registro => {
+                registro.totalPedidosSemana = totalPedidosSemana;
+            });
+            
+            // Guardar primero los nuevos registros
+            nuevosRegistros.forEach(registro => {
+                Storage.agregarRegistro(registro);
+            });
+            
+            // Procesar los registros existentes
+            if (registrosExistentes.length > 0) {
+                this.manejarRegistrosDuplicados(registrosExistentes, () => {
+                    this.mostrarMensajeExito(nuevosRegistros.length + registrosExistentes.length);
+                    this.limpiarTablaRegistro();
+                });
+            } else if (nuevosRegistros.length > 0) {
+                this.mostrarMensajeExito(nuevosRegistros.length);
+                this.limpiarTablaRegistro();
+            } else {
+                Utils.mostrarMensaje("No se encontraron datos para guardar", "warning");
+            }
+        } catch (error) {
+            console.error('Error al procesar formulario:', error);
+            Utils.mostrarMensaje("Error al procesar el formulario: " + error.message, "error");
+        }
+    }
+    
+   
+                                    /**
+     * Muestra el mensaje de éxito con formato específico
+     * @param {number} cantidadRegistros - Cantidad de registros procesados
+     */
+    mostrarMensajeExito(cantidadRegistros) {
+        Utils.mostrarMensaje(`Datos guardados correctamente.
+                            Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): 2025-03-14 15:32:04
+                            Current User's Login: JhonyAlex
+                            Se procesaron ${cantidadRegistros} registro(s) correctamente.`, 
+                           "success");
+    }
+    
+    /**
+     * Maneja los registros duplicados y pregunta al usuario qué hacer
+     * @param {Array} registrosDuplicados - Lista de objetos {registro, existente}
+     * @param {Function} callback - Función a ejecutar al terminar
+     */
+    manejarRegistrosDuplicados(registrosDuplicados, callback) {
+        if (registrosDuplicados.length === 0) {
+            if (callback) callback();
             return;
         }
         
-        if (password !== confirmPassword) {
-            Utils.mostrarMensaje("Las contraseñas no coinciden", "warning");
-            return;
-        }
+        const { registro, existente } = registrosDuplicados[0];
         
-        // Crear usuario
-        const usuario = new Usuario(
-            null,
-            username,
-            Usuario.hashPassword(password),
-            "usuario"
+        // Preguntar qué hacer con este registro
+        Utils.confirmarAccion(
+            `El número de pedido ${registro.numPedido} ya existe. ¿Qué deseas hacer?
+             - Sí: Editar el registro existente
+             - No: Duplicar el registro con nuevos valores
+             - Cancelar: Detener el proceso`,
+            "Pedido Duplicado",
+            () => {
+                // Editar el registro existente (conservar el ID)
+                registro.id = existente.id;
+                Storage.actualizarRegistro(registro);
+                
+                // Procesar el siguiente registro duplicado
+                this.manejarRegistrosDuplicados(registrosDuplicados.slice(1), callback);
+            }
         );
         
-        if (Storage.agregarUsuario(usuario)) {
-            // Mostrar mensaje y cambiar a pestaña de login
-            Utils.mostrarMensaje(`Usuario ${username} registrado correctamente`, "success");
+        // Configurar botón No para duplicar
+        const btnNo = document.querySelector('#confirmModal .btn-secondary');
+        if (btnNo) {
+            btnNo.textContent = "Duplicar";
+            btnNo.classList.remove('btn-secondary');
+            btnNo.classList.add('btn-success');
             
-            // Limpiar formulario
-            document.getElementById('regUsername').value = '';
-            document.getElementById('regPassword').value = '';
-            document.getElementById('regConfirmPassword').value = '';
+            // Guardar el handler original
+            const originalHandler = btnNo.onclick;
             
-            // Cambiar a pestaña de login
-            const loginTab = document.querySelector('#authTabs a[href="#login"]');
-            new bootstrap.Tab(loginTab).show();
-        } else {
-            Utils.mostrarMensaje("El nombre de usuario ya existe", "error");
+            btnNo.onclick = () => {
+                // Crear un nuevo registro con nuevo ID
+                Storage.agregarRegistro(registro);
+                
+                // Ocultar modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+                modal.hide();
+                
+                // Procesar el siguiente registro duplicado
+                setTimeout(() => {
+                    this.manejarRegistrosDuplicados(registrosDuplicados.slice(1), callback);
+                    
+                    // Restaurar el botón
+                    btnNo.textContent = "Cancelar";
+                    btnNo.classList.remove('btn-success');
+                    btnNo.classList.add('btn-secondary');
+                    btnNo.onclick = originalHandler;
+                }, 500);
+            };
         }
-    }
-    
-    /**
-     * Cierra la sesión del usuario actual
-     */
-    cerrarSesion() {
-        // Cerrar sesión
-        Storage.cerrarSesion();
-        
-        // Mostrar formulario de login
-        this    /**
-        * Cierra la sesión del usuario actual
-        */
-       cerrarSesion() {
-           // Cerrar sesión
-           Storage.cerrarSesion();
-           
-           // Mostrar formulario de login
-           this.mostrarSeccionAuth();
-           
-           // Limpiar nombre de usuario
-           document.getElementById('currentUser').textContent = 'Usuario';
-           
-           Utils.mostrarMensaje("Has cerrado sesión correctamente", "info");
-       }
-   }
+    }}
