@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Registro de Producción</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Sistema de Registro de Producción</h1>
+    </header>
+    <main>
+        <section id="registro">
+            <h2>Registro de Información</h2>
+            <form id="registroForm">
+                <label for="fecha">Fecha:</label>
+                <input type="date" id="fecha" name="fecha" required><br>
+
+                <label for="turno">Turno:</label>
+                <select id="turno" name="turno" required>
+                    <option value="Mañana">Mañana</option>
+                    <option value="Tarde">Tarde</option>
+                    <option value="Noche">Noche</option>
+                </select><br>
+
+                <label for="operario">Operario:</label>
+                <select id="operario" name="operario" required>
+                    <!-- Options will be populated dynamically -->
+                </select><br>
+
+                <label for="numeroPedido">Número de Pedido:</label>
+                <input type="text" id="numeroPedido" name="numeroPedido" required><br>
+
+                <label for="maquina">Máquina:</label>
+                <input type="text" id="maquina" name="maquina" required><br>
+
+                <label for="metros">Metros:</label>
+                <input type="number" id="metros" name="metros" required><br>
+
+                <label for="bandas">Bandas:</label>
+                <input type="number" id="bandas" name="bandas" required><br>
+
+                <label for="refilado">Refilado:</label>
+                <input type="checkbox" id="refilado" name="refilado"><br>
+
+                <label for="tipo">Tipo:</label>
+                <select id="tipo" name="tipo" required>
+                    <option value="Monolámina">Monolámina</option>
+                    <option value="Bicapa">Bicapa</option>
+                    <option value="Tricapa">Tricapa</option>
+                </select><br>
+
+                <label for="barras">Barras:</label>
+                <input type="number" id="barras" name="barras" required><br>
+
+                <label for="micro">Micro:</label>
+                <input type="checkbox" id="micro" name="micro"><br>
+
+                <button type="submit">Registrar</button>
+                <button type="button" onclick="limpiarFormulario()">Limpiar</button>
+            </form>
+        </section>
+
+        <section id="kpi">
+            <h2>KPIs</h2>
+            <div id="kpiContainer">
+                <!-- KPIs displayed here -->
+            </div>
+        </section>
+
+        <section id="validaciones">
+            <h2>Gestión de Validaciones</h2>
+            <form id="validacionesForm">
+                <label for="nuevoOperario">Nuevo Operario:</label>
+                <input type="text" id="nuevoOperario" name="nuevoOperario"><br>
+                <button type="button" onclick="agregarOperario()">Agregar Operario</button>
+            </form>
+            <div id="listaOperarios">
+                <!-- Lista de operarios mostrada aquí -->
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Sistema de Registro de Producción</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
