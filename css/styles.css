@@ -1,0 +1,133 @@
+/* Estilos generales */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar y cabeceras */
+.navbar-brand {
+    font-weight: 600;
+}
+
+.card-header {
+    font-weight: 500;
+}
+
+/* Tablas */
+.table th {
+    font-weight: 600;
+}
+
+.table-responsive {
+    min-height: 300px;
+}
+
+.ordenar {
+    color: #212529;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.ordenar:hover {
+    color: #0d6efd;
+}
+
+.ordenar i {
+    margin-left: 5px;
+}
+
+/* Tarjetas de KPIs en el dashboard */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card .display-4 {
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+/* Formulario de registro */
+.tab-content {
+    padding: 20px 0;
+}
+
+/* Sección activa del menú */
+.nav-link.active-section {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+/* Campos readonly */
+.form-control:read-only {
+    background-color: #f8f9fa;
+}
+
+/* Tooltips personalizados */
+.custom-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.custom-tooltip .tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.custom-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Animación de carga */
+.loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 2s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Estilos para el registro de producción */
+.registro-dia {
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+}
+
+.registro-item {
+    background-color: white;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.btn-agregar-registro {
+    width: 100%;
+    margin-top: 10px;
+}
