@@ -176,7 +176,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Cargar las máquinas en el select cuando se carga la página
     function cargarMaquinasSelect() {
         const selectMaquinas = document.getElementById('maquina');
+        if (!selectMaquinas) return; // Si no existe el selector, salir de la función
         const maquinas = getMaquinas();
+        selectMaquinas.innerHTML = '<option value="">Seleccionar Máquina...</option>'; // Limpiar el selector
         maquinas.forEach(maquina => {
             const option = document.createElement('option');
             option.value = maquina.id;
@@ -185,8 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    cargarMaquinasSelect();
-
+   
     // Renderizado inicial de la tabla.
     renderOperariosTable();
     //Actualización inicial de los selects.
