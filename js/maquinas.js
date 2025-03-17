@@ -32,7 +32,8 @@ function agregarMaquina(nombre) {
 
 // Función para actualizar la tabla de máquinas en la sección de configuración
 function actualizarTablaMaquinas() {
-    const tablaMaquinas = document.getElementById('tablaMaquinas').querySelector('tbody');
+    const tablaMaquinas = document.getElementById('tablaMaquinas')?.querySelector('tbody'); // Añadido operador de encadenamiento opcional
+    if (!tablaMaquinas) return; // Añadido comprobación
     tablaMaquinas.innerHTML = ''; // Limpiar la tabla
 
     maquinas.forEach(maquina => {
@@ -63,8 +64,8 @@ function actualizarSelectMaquinas() {
             select.appendChild(option);
         });
     });
-     //Recargar los selectores de operarios, al modificarse el de maquinas
-    cargarMaquinasSelect();
+    //Recargar los selectores de operarios, al modificarse el de maquinas
+    cargarMaquinasSelect(); // Llamada a la función añadida
     updateEditMaquinasSelect();
 }
 
@@ -101,7 +102,7 @@ function agregarEventListenersMaquinas() {
     botonesEliminar.forEach(boton => {
         boton.addEventListener('click', () => {
             const id = boton.dataset.id;
-                eliminarMaquina(id);
+            eliminarMaquina(id);
         });
     });
 
@@ -140,7 +141,7 @@ function mostrarModalEditarMaquina(maquina) {
 
 // Event listener para el formulario del modal
 const editarMaquinaForm = document.getElementById('editarMaquinaForm');
-editarMaquinaForm.addEventListener('submit', (event) => {
+editarMaquinaForm?.addEventListener('submit', (event) => { // Añadido operador de encadenamiento opcional
     event.preventDefault();
     const nuevoNombre = document.getElementById('editNombreMaquina').value;
     editarMaquina(maquinaAEditarId, nuevoNombre); // Usar el ID guardado
@@ -150,7 +151,7 @@ editarMaquinaForm.addEventListener('submit', (event) => {
 });
 
 // Event listener para el formulario de agregar máquina
-document.getElementById('maquinaForm').addEventListener('submit', (event) => {
+document.getElementById('maquinaForm')?.addEventListener('submit', (event) => { // Añadido operador de encadenamiento opcional
     event.preventDefault();
     const nombreMaquina = document.getElementById('nombreMaquina').value;
     if (nombreMaquina.trim() !== '') {
@@ -168,4 +169,18 @@ cargarMaquinas();
 function obtenerNombreMaquinaPorId(id) {
     const maquina = maquinas.find(m => m.id === id);
     return maquina ? maquina.nombre : 'Máquina no encontrada';
+}
+
+// Cargar las máquinas en el select cuando se carga la página
+function cargarMaquinasSelect() {
+    const selectMaquinas = document.getElementById('maquina');
+    if (!selectMaquinas) return; // Si no existe el selector, salir de la función
+    const maquinas = getMaquinas();
+    selectMaquinas.innerHTML = '<option value="">Seleccionar Máquina...</option>'; // Limpiar el selector
+    maquinas.forEach(maquina => {
+        const option = document.createElement('option');
+        option.value = maquina.id;
+        option.text = maquina.nombre;
+        selectMaquinas.appendChild(option);
+    });
 }

@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- Gestión de Operarios ---
     const operarioForm = document.getElementById('operarioForm');
     const nombreOperarioInput = document.getElementById('nombreOperario');
-    const tablaOperariosBody = document.getElementById('tablaOperarios').querySelector('tbody');
+    const tablaOperariosBody = document.getElementById('tablaOperarios')?.querySelector('tbody'); // Añadido operador de encadenamiento opcional
     const maquinaSelect = document.getElementById('maquina'); // Nuevo: Select de máquinas
 
     // Función para obtener los operarios desde LocalStorage.
@@ -23,7 +23,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const maquinasJSON = localStorage.getItem('maquinas');
         return maquinasJSON ? JSON.parse(maquinasJSON) : [];
     }
-
+     // Añadido comprobación
+    if(!tablaOperariosBody) return;
     // Función para renderizar (dibujar) la tabla de operarios.
     function renderOperariosTable() {
         tablaOperariosBody.innerHTML = ''; // Limpia el contenido actual de la tabla.
@@ -72,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Agregar un nuevo operario.
-    operarioForm.addEventListener('submit', function (e) {
+    operarioForm?.addEventListener('submit', function (e) { // Añadido operador de encadenamiento opcional
         e.preventDefault();
         const nombreOperario = nombreOperarioInput.value.trim();
         const maquinaSeleccionada = maquinaSelect.value;
@@ -94,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //Función para actualizar el select de la sección registro
     function updateOperarioSelect() {
         const selectOperario = document.getElementById('operario');
+        if (!selectOperario) return; // añadido
         selectOperario.innerHTML = '<option value="">Seleccionar...</option>';
         const operarios = getOperarios();
         operarios.forEach(operario => {
@@ -107,6 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //Función para actualizar el select de la sección reportes
     function updateOperarioReportesSelect() {
         const selectOperario = document.getElementById('reporteOperario');
+        if (!selectOperario) return; // añadido
         selectOperario.innerHTML = '<option value="">Todos</option>';
         const operarios = getOperarios();
         operarios.forEach(operario => {
@@ -120,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //Función para actualizar el select de la sección baseDatos
     function updateOperarioBaseDatosSelect() {
         const selectOperario = document.getElementById('filtroOperario');
+        if (!selectOperario) return; // añadido
         selectOperario.innerHTML = '<option value="">Todos los Operarios</option>';
         const operarios = getOperarios();
         operarios.forEach(operario => {
@@ -145,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
         updateEditMaquinasSelect(operario.maquina)
     }
 
-    editarOperarioForm.addEventListener('submit', (e) => {
+    editarOperarioForm?.addEventListener('submit', (e) => { // Añadido operador de encadenamiento opcional
         e.preventDefault();
         const operarios = getOperarios();
         operarios[operarioIndex].nombre = editNombreOperarioInput.value.trim();
@@ -172,22 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
             editMaquinaSelect.appendChild(option);
         });
     }
-
-    // Cargar las máquinas en el select cuando se carga la página
-    function cargarMaquinasSelect() {
-        const selectMaquinas = document.getElementById('maquina');
-        if (!selectMaquinas) return; // Si no existe el selector, salir de la función
-        const maquinas = getMaquinas();
-        selectMaquinas.innerHTML = '<option value="">Seleccionar Máquina...</option>'; // Limpiar el selector
-        maquinas.forEach(maquina => {
-            const option = document.createElement('option');
-            option.value = maquina.id;
-            option.text = maquina.nombre;
-            selectMaquinas.appendChild(option);
-        });
-    }
-
-   
+    
     // Renderizado inicial de la tabla.
     renderOperariosTable();
     //Actualización inicial de los selects.
@@ -195,3 +184,4 @@ document.addEventListener('DOMContentLoaded', function () {
     updateOperarioReportesSelect();
     updateOperarioBaseDatosSelect();
 });
+
