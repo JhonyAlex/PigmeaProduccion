@@ -18,7 +18,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <i class="fas fa-industry me-2"></i>Reportes de producción PIGMEA S.L.
+                <i class="fas fa-industry me-2"></i>Produccción PIGMEA S.L.
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -578,7 +578,11 @@
                         <div class="card-body">
                             <form id="operarioForm" class="mb-3">
                                 <div class="input-group mb-3">
-                                    <input type="text" class="form-control" id="nombreOperario" placeholder="Nombre del Operario">
+                                    <input type="text" class="form-control" id="nombreOperario" placeholder="Nombre del Operario" required>
+                                     <select class="form-select" id="maquina" required>
+                                        <option value="">Seleccionar Máquina...</option>
+                                        <!-- Opciones dinámicas -->
+                                    </select>
                                     <button class="btn btn-primary" type="submit" id="btnAgregarOperario">Agregar</button>
                                 </div>
                             </form>
@@ -799,6 +803,35 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" id="btnGuardarEdicion">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Modal para Editar Operario -->
+    <div class="modal fade" id="editarOperarioModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">Editar Operario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editarOperarioForm">
+                        <div class="mb-3">
+                            <label for="editNombreOperario" class="form-label">Nombre del Operario</label>
+                            <input type="text" class="form-control" id="editNombreOperario" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMaquinaOperario" class="form-label">Máquina</label>
+                            <select class="form-select" id="editMaquinaOperario" required>
+                                <!-- Opciones de máquinas se cargarán dinámicamente -->
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+                    </form>
                 </div>
             </div>
         </div>
