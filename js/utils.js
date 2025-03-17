@@ -14,26 +14,22 @@ const Utils = {
         
         // Convertir a objeto Date si es un string
         if (typeof fecha === 'string') {
-            fecha = new Date(fecha);
+            fecha = parseISO(fecha);
         }
         
         // Opciones para formatear la fecha
-        const opcionesFecha = { day: '2-digit', month: '2-digit', year: 'numeric' };
-        const opcionesHora = { hour: '2-digit', minute: '2-digit' };
-        
         try {
             switch (formato) {
                 case 'fecha':
-                    return fecha.toLocaleDateString('es-ES', opcionesFecha);
+                    return format(fecha, 'dd/MM/yyyy', { locale: es });
                 case 'hora':
-                    return fecha.toLocaleTimeString('es-ES', opcionesHora);
+                    return format(fecha, 'HH:mm', { locale: es });
                 case 'fechaHora':
-                    return fecha.toLocaleDateString('es-ES', opcionesFecha) + ' ' + 
-                           fecha.toLocaleTimeString('es-ES', opcionesHora);
+                    return format(fecha, 'dd/MM/yyyy HH:mm:ss', { locale: es });
                 case 'iso':
-                    return fecha.toISOString().split('T')[0];
+                    return format(fecha, 'yyyy-MM-dd', { locale: es });
                 default:
-                    return fecha.toLocaleDateString('es-ES');
+                    return format(fecha, 'dd/MM/yyyy', { locale: es });
             }
         } catch (error) {
             console.error('Error al formatear fecha:', error);
@@ -337,13 +333,7 @@ const Utils = {
      * @returns {Date} El primer día (lunes) de esa semana
      */
     obtenerInicioSemana: function(fecha) {
-        const fechaCopia = new Date(fecha);
-        const diaSemana = fecha.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
-        
-        // Ajustar al lunes anterior (o al mismo día si es lunes)
-        const diasRestar = diaSemana === 0 ? 6 : diaSemana - 1;
-        fechaCopia.setDate(fechaCopia.getDate() - diasRestar);
-        return fechaCopia;
+        return startOfWeek(fecha, { locale: es });
     },
     
     /**
@@ -353,9 +343,7 @@ const Utils = {
      */
     obtenerFinSemana: function(fecha) {
         const inicioSemana = this.obtenerInicioSemana(fecha);
-        const finSemana = new Date(inicioSemana);
-        finSemana.setDate(inicioSemana.getDate() + 6);
-        return finSemana;
+        return endOfWeek(inicioSemana, { locale: es });
     },
     
     /**
@@ -387,17 +375,10 @@ const Utils = {
      * @returns {string} Fecha formateada
      */
     fechaParaInput: function(fecha) {
-        if (!fecha) return '';
-        
         if (typeof fecha === 'string') {
-            fecha = new Date(fecha);
+            fecha = parseISO(fecha);
         }
-        
-        const anio = fecha.getFullYear();
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-        const dia = String(fecha.getDate()).padStart(2, '0');
-        
-        return `${anio}-${mes}-${dia}`;
+        return format(fecha, 'yyyy-MM-dd');
     },
     
     /**

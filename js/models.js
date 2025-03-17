@@ -26,7 +26,7 @@ class Registro {
         maquina = ""
     ) {
         this.id = id || window.crypto.randomUUID();
-        this.fecha = fecha instanceof Date ? fecha : new Date(fecha);
+        this.fecha = fecha instanceof Date ? fecha : parseISO(fecha); // Asegurarse de analizar la fecha
         this.numPedido = numPedido;
         this.dia = dia || this.getDiaSemana(this.fecha);
         this.mes = mes || this.getMes(this.fecha);
@@ -49,52 +49,48 @@ class Registro {
     // Obtiene el día de la semana en formato texto
     getDiaSemana(fecha) {
         const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        return dias[fecha.getDay()];
+        return dias[getDay(fecha)];
     }
 
     // Obtiene el mes en formato texto
     getMes(fecha) {
         const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        return meses[fecha.getMonth()];
+        return meses[getMonth(fecha)];
     }
 
     // Obtiene la semana del año
     getSemanaAnio(fecha) {
-        const primerDia = new Date(fecha.getFullYear(), 0, 1);
-        const dias = Math.floor((fecha - primerDia) / (24 * 60 * 60 * 1000));
-        return Math.ceil((dias + primerDia.getDay() + 1) / 7);
+        return getWeek(fecha, { locale: es });
     }
 
     // Obtiene la semana del mes
     getSemanaMes(fecha) {
-        const dia = fecha.getDate();
-        return Math.ceil(dia / 7);
+        return getWeekOfMonth(fecha, { locale: es });
     }
 
     // Calcula la fecha a partir de un día de semana y una fecha base
     static calcularFecha(fechaBase, diaSemana) {
-        // Convertir el nombre del día a número (0=Domingo, 1=Lunes, etc.)
-        const diasSemana = { 'domingo': 0, 'lunes': 1, 'martes': 2, 'miércoles': 3, 'miercoles': 3, 'jueves': 4, 'viernes': 5, 'sábado': 6, 'sabado': 6 };
-        const diaNumero = diasSemana[diaSemana.toLowerCase()];
-        
+        const diasSemanaMap = { 'domingo': 0, 'lunes': 1, 'martes': 2, 'miércoles': 3, 'miercoles': 3, 'jueves': 4, 'viernes': 5, 'sábado': 6, 'sabado': 6 };
+        const diaNumero = diasSemanaMap[diaSemana.toLowerCase()];
+
         if (diaNumero === undefined) return null;
-        
-        // Obtiene el lunes de la semana de la fecha base
-        const lunesDeLaSemana = Registro.obtenerLunesDeLaSemana(fechaBase);
-        
-        // Calcula la fecha sumando los días desde el lunes
-        return new Date(lunesDeLaSemana.getTime() + (diaNumero - 1) * 24 * 60 * 60 * 1000);
+
+        const fechaBaseDate = fechaBase instanceof Date ? fechaBase : parseISO(fechaBase);
+        const diaBaseNumero = getDay(fechaBaseDate);
+
+        let diferenciaDias = diaNumero - diaBaseNumero;
+        if (diferenciaDias < 0) {
+            diferenciaDias += 7;
+        }
+
+        const fechaCalculada = new Date(fechaBaseDate);
+        fechaCalculada.setDate(fechaCalculada.getDate() + diferenciaDias);
+        return fechaCalculada;
     }
 
     // Obtiene el lunes de la semana de una fecha
     static obtenerLunesDeLaSemana(fecha) {
-        const fechaCopia = new Date(fecha);
-        const diaSemana = fecha.getDay(); // 0=Domingo, 1=Lunes, ..., 6=Sábado
-        
-        // Ajustar al lunes anterior
-        const diasParaLunes = diaSemana === 0 ? 6 : diaSemana - 1;
-        fechaCopia.setDate(fechaCopia.getDate() - diasParaLunes);
-        return fechaCopia;
+        return startOfWeek(fecha, { locale: es });
     }
 
     // Crea una instancia a partir de un objeto plano

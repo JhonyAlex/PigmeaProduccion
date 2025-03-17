@@ -133,7 +133,7 @@ class UI {
         
         // Ordenar por fecha descendente y tomar los últimos 10
         const ultimosRegistros = [...registros]
-            .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+            .sort((a, b) => b.fecha - a.fecha)
             .slice(0, 10);
         
         ultimosRegistros.forEach(registro => {
@@ -177,7 +177,7 @@ class UI {
         try {
             // Inicializar fecha base con la fecha actual (lunes de la semana actual)
             const fechaActual = new Date();
-            const lunesSemana = Utils.obtenerInicioSemana(fechaActual);
+        const lunesSemana = startOfWeek(fechaActual, { locale: es });
             
             // Establecer la fecha base en el campo correspondiente
             const fechaBaseInput = document.getElementById('fechaBase');
@@ -242,10 +242,10 @@ class UI {
             
             // Título y fecha del día
             let diaCapitalizado = dia.charAt(0).toUpperCase() + dia.slice(1);
-            if (dia === 'miercoles') diaCapitalizado = 'Miércoles';
-            if (dia === 'sabado') diaCapitalizado = 'Sábado';
+        if (dia === 'miercoles') diaCapitalizado = 'Miércoles';
+        if (dia === 'sabado') diaCapitalizado = 'Sábado';
             
-            const fechaDia = this.calcularFechaDia(index + 1); // Lunes = 1, Domingo = 7
+        const fechaDia = this.calcularFechaDia(index); // Lunes = 0, Domingo = 6
             
             // Crear tabla para los registros del día
             const tabla = `
@@ -489,10 +489,10 @@ class UI {
         const fechaBaseInput = document.getElementById('fechaBase');
         if (!fechaBaseInput || !fechaBaseInput.value) return new Date();
         
-        const fechaBase = new Date(fechaBaseInput.value);
-        const result = new Date(fechaBase);
-        result.setDate(fechaBase.getDate() + diaSemana - 1);
-        return result;
+        const fechaBase = parseISO(fechaBaseInput.value);
+        const fechaCalculada = new Date(startOfWeek(fechaBase, { locale: es }));
+        fechaCalculada.setDate(fechaCalculada.getDate() + diaSemana);
+        return fechaCalculada;
     }
     
     /**
@@ -529,9 +529,9 @@ class UI {
             
             diasSemana.forEach((dia, index) => {
                 const diaSemana = index + 1; // 1=lunes, 7=domingo
-                const fecha = this.calcularFechaDia(diaSemana);
-                
-                const nombreDia = Utils.nombreDiaSemana(fecha);
+                const fecha = this.calcularFechaDia(index);
+
+        const nombreDia = format(fecha, 'EEEE', { locale: es });
                 const contenedor = document.getElementById(`registros-${dia}`);
                 if (!contenedor) return; // Verificación añadida
                 
@@ -630,9 +630,9 @@ class UI {
             });
             
             // Calcular total de pedidos por semana
-            const semanaActual = Utils.obtenerInicioSemana(fechaBase).toDateString();
-            const registrosSemana = [...nuevosRegistros, ...registrosExistentes.map(r => r.registro)]
-                .filter(r => Utils.obtenerInicioSemana(r.fecha).toDateString() === semanaActual);
+            const semanaActual = startOfWeek(fechaBase, { locale: es });
+        const registrosSemana = [...nuevosRegistros, ...registrosExistentes.map(r => r.registro)]
+            .filter(r => startOfWeek(r.fecha, { locale: es }).getTime() === semanaActual.getTime());
             const totalPedidosSemana = registrosSemana.length;
             
             registrosSemana.forEach(registro => {

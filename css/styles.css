@@ -132,6 +132,23 @@ body {
     margin-top: 10px;
 }
 
-- Antes: .registro-dia {
-    - Después: .registro-dia {
-        margin-bottom: 15px;}}
+ /* Estilos para el registro de producción */
+ .registro-dia {
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    margin-bottom: 15px; /* Ajuste: Más espacio entre días */
+}
+
+.registro-item {
+    background-color: white;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.btn-agregar-registro {
+    width: 100%;
+    margin-top: 10px;
+}

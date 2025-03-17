@@ -16,6 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicializar autenticación
     ui.inicializarAuth();
     
+    // Añadir mensajes de ayuda para el usuario
+    setTimeout(() => {
+        if (esPrimeraEjecucion) {
+            Utils.mostrarMensaje("Bienvenido al Sistema de Gestión de Producción. Se han cargado datos de demostración.", "info");
+        }
+    }, 1000);
+    
 // Establecer fecha y usuario por defecto (para cumplir con el requisito específico)
 const fechaHoraUTC = "2025-03-14 15:58:29";
 const usuarioActual = "JhonyAlex";
@@ -55,4 +62,7 @@ const usuarioActual = "JhonyAlex";
             // Implementación según se requiera
         }
     };
-});
+}
+
+
+);

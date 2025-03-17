@@ -436,7 +436,7 @@ const Charts = {
      */
     agruparPorDia(registros, operarios) {
         // Obtener días únicos
-        const diasUnicos = [...new Set(registros.map(r => new Date(r.fecha).toLocaleDateString()))];
+        const diasUnicos = [...new Set(registros.map(r => format(r.fecha, 'yyyy-MM-dd')))];
         diasUnicos.sort((a, b) => new Date(a) - new Date(b));
         
         // Limitar a los últimos 14 días para que sea manejable
@@ -449,8 +449,8 @@ const Charts = {
         operarios.forEach((operario, index) => {
             const data = diasLimitados.map(dia => {
                 return registros
-                    .filter(r => new Date(r.fecha).toLocaleDateString() === dia && r.operario === operario)
-                    .reduce((sum, r) => sum + parseFloat(r.metros || 0), 0);
+                .filter(r => format(r.fecha, 'yyyy-MM-dd') === dia && r.operario === operario)
+                .reduce((sum, r) => sum + parseFloat(r.metros || 0), 0);
             });
             
             datasets.push({
@@ -463,7 +463,7 @@ const Charts = {
         });
         
         return {
-            labels: diasLimitados.map(dia => new Date(dia).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })),
+            labels: diasLimitados.map(dia => format(parseISO(dia), 'dd/MM', { locale: es })),
             datasets: datasets
         };
     },
@@ -477,8 +477,10 @@ const Charts = {
     agruparPorSemana(registros, operarios) {
         // Obtener semanas únicas
         const semanasUnicas = [...new Set(registros.map(r => {
-            const fecha = new Date(r.fecha);
-            return `${fecha.getFullYear()}-S${r.semana || 1}`;
+            const fecha = r.fecha;
+            const anio = fecha.getFullYear();
+            const semana = getWeek(fecha, { locale: es });
+            return `<span class="math-inline">\{anio\}\-S</span>{semana}`;
         }))];
         semanasUnicas.sort();
         
@@ -492,14 +494,16 @@ const Charts = {
         operarios.forEach((operario, index) => {
             const data = semanasLimitadas.map(semana => {
                 const [anio, numSemana] = semana.split('-S');
-                return registros
-                    .filter(r => {
-                        const fecha = new Date(r.fecha);
-                        return fecha.getFullYear() === parseInt(anio) && 
-                               (r.semana || 1) === parseInt(numSemana) && 
-                               r.operario === operario;
-                    })
-                    .reduce((sum, r) => sum + parseFloat(r.metros || 0), 0);
+        return registros
+            .filter(r => {
+                const fecha = r.fecha;
+                const fechaAnio = fecha.getFullYear();
+                const fechaSemana = getWeek(fecha, { locale: es });
+                return fechaAnio === parseInt(anio) &&
+                       fechaSemana === parseInt(numSemana) &&
+                       r.operario === operario;
+            })
+            .reduce((sum, r) => sum + parseFloat(r.metros || 0), 0);
             });
             
             datasets.push({
@@ -526,8 +530,8 @@ const Charts = {
     agruparPorMes(registros, operarios) {
         // Obtener meses únicos
         const mesesUnicos = [...new Set(registros.map(r => {
-            const fecha = new Date(r.fecha);
-            return `${fecha.getFullYear()}-${fecha.getMonth() + 1}`;
+            const fecha = r.fecha;
+            return `<span class="math-inline">\{fecha\.getFullYear\(\)\}\-</span>{fecha.getMonth()}`;
         }))];
         mesesUnicos.sort();
         
@@ -535,7 +539,7 @@ const Charts = {
         const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
         const labelsLegibles = mesesUnicos.map(mes => {
             const [anio, numMes] = mes.split('-');
-            return `${meses[parseInt(numMes) - 1]} ${anio}`;
+            return `${meses[parseInt(numMes)]} ${anio}`;
         });
         
         // Crear datasets
@@ -543,16 +547,14 @@ const Charts = {
         const colores = Utils.generarColores(operarios.length);
         
         operarios.forEach((operario, index) => {
-            const data = mesesUnicos.map(mes => {
-                const [anio, numMes] = mes.split('-');
+            const [anio, numMes] = mes.split('-');
                 return registros
                     .filter(r => {
-                        const fecha = new Date(r.fecha);
-                        return fecha.getFullYear() === parseInt(anio) && 
-                               fecha.getMonth() + 1 === parseInt(numMes) && 
-                               r.operario === operario;
-                    })
-                    .reduce((sum, r) => sum + parseFloat(r.metros || 0), 0);
+                        return r.fecha.getFullYear() === parseInt(anio) &&
+                            r.fecha.getMonth() === parseInt(numMes) &&
+                            r.operario === operario;
+            })
+            .reduce((sum, r) => sum + parseFloat(r.metros || 0), 0);
             });
             
             datasets.push({
@@ -578,7 +580,7 @@ const Charts = {
      */
     agruparPorAnio(registros, operarios) {
         // Obtener años únicos
-        const aniosUnicos = [...new Set(registros.map(r => new Date(r.fecha).getFullYear()))];
+        const aniosUnicos = [...new Set(registros.map(r => r.fecha.getFullYear()))];
         aniosUnicos.sort();
         
         // Crear datasets
@@ -588,8 +590,8 @@ const Charts = {
         operarios.forEach((operario, index) => {
             const data = aniosUnicos.map(anio => {
                 return registros
-                    .filter(r => new Date(r.fecha).getFullYear() === anio && r.operario === operario)
-                    .reduce((sum, r) => sum + parseFloat(r.metros || 0), 0);
+            .filter(r => r.fecha.getFullYear() === anio && r.operario === operario)
+            .reduce((sum, r) => sum + parseFloat(r.metros || 0), 0);
             });
             
             datasets.push({

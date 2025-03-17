@@ -17,9 +17,9 @@ class Reportes {
         }
         
         if (filtros.hasta) {
-            const fechaHasta = new Date(filtros.hasta);
-            fechaHasta.setHours(23, 59, 59, 999);
-            registros = registros.filter(r => new Date(r.fecha) <= fechaHasta);
+            const fechaHasta = parseISO(filtros.hasta);
+            const fechaHastaFinDia = new Date(fechaHasta.getFullYear(), fechaHasta.getMonth(), fechaHasta.getDate(), 23, 59, 59, 999);
+            registros = registros.filter(r => r.fecha <= fechaHastaFinDia);
         }
         
         if (filtros.operario) {
