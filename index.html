@@ -20,33 +20,33 @@
             <a class="navbar-brand" href="#">
                 <i class="fas fa-industry me-2"></i>Sistema de Producción
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-section="dashboard">
+                        <a class="nav-link" href="#dashboard" data-section="dashboardSection">
                             <i class="fas fa-chart-line me-1"></i>Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-section="registro">
+                        <a class="nav-link" href="#registro" data-section="registroSection">
                             <i class="fas fa-edit me-1"></i>Registro
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-section="baseDatos">
+                        <a class="nav-link" href="#baseDatos" data-section="baseDatosSection">
                             <i class="fas fa-database me-1"></i>Base de Datos
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-section="reportes">
+                        <a class="nav-link" href="#reportes" data-section="reportesSection">
                             <i class="fas fa-file-alt me-1"></i>Reportes
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-section="configuracion">
+                        <a class="nav-link" href="#configuracion" data-section="configuracionSection">
                             <i class="fas fa-cog me-1"></i>Configuración
                         </a>
                     </li>
@@ -55,7 +55,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                             data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i><span id="currentUser">Usuario</span>
+                            <i class="fas fa-user-circle me-1"></i><span id="currentUser">JhonyAlex</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="#" id="btnPerfil">Perfil</a></li>
@@ -810,5 +810,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Scripts para crear gráficos-->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <!-- Incluir la opción de que se pueda navegar entre secciones -->
+    <script src="js/navigation.js"></script>
 </body>
 </html>
