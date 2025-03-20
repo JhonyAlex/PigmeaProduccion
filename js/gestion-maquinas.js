@@ -123,11 +123,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (maquinaActualId) {
             const maquina = maquinas.find(m => m.id === maquinaActualId);
             if (maquina && maquina.operariosAsignados) {
+                // Filtrar solo operarios que no estén ya asignados a esta máquina
                 operariosNoAsignados = operarios.filter(op => 
-                    !maquina.operariosAsignados.includes(op.id)
+                    !maquina.operariosAsignados.includes(op.id) && 
+                    (!op.maquinaId || op.maquinaId === maquinaActualId)
                 );
             }
         }
+        
+        // Ordenar los operarios por nombre para mejor usabilidad
+        operariosNoAsignados.sort((a, b) => a.nombre.localeCompare(b.nombre));
         
         operariosNoAsignados.forEach(operario => {
             const option = document.createElement('option');
@@ -135,6 +140,14 @@ document.addEventListener('DOMContentLoaded', function() {
             option.textContent = operario.nombre;
             selectOperario.appendChild(option);
         });
+        
+        // Si no hay operarios disponibles, mostrar mensaje en el selector
+        if (operariosNoAsignados.length === 0) {
+            const option = document.createElement('option');
+            option.disabled = true;
+            option.textContent = "No hay operarios disponibles";
+            selectOperario.appendChild(option);
+        }
     }
     
     function agregarMaquina(e) {
@@ -243,7 +256,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function mostrarModalSeleccionarOperario() {
+        // Actualizar el selector antes de mostrar el modal
         actualizarSelectorOperarios();
+        
+        // Verificar si hay operarios disponibles para seleccionar
+        const hayOperariosDisponibles = Array.from(selectOperario.options)
+            .some(option => !option.disabled && option.value);
+        
+        if (!hayOperariosDisponibles) {
+            alert("No hay operarios disponibles para asignar a esta máquina.");
+            return;
+        }
+        
         modalSeleccionarOperario.show();
     }
     
@@ -357,9 +381,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function confirmarEliminarMaquina(maquinaId) {
+        const maquina = maquinas.find(m => m.id === maquinaId);
+        if (!maquina) return;
+        
+        // Verificar si la máquina tiene operarios asignados
+        const tieneOperariosAsignados = maquina.operariosAsignados && 
+                                       maquina.operariosAsignados.length > 0;
+        
+        if (tieneOperariosAsignados) {
+            // Hay operarios asignados, mostrar alerta especial
+            const operariosAsignados = maquina.operariosAsignados.map(opId => {
+                const operario = operarios.find(op => op.id === opId);
+                return operario ? operario.nombre : 'Desconocido';
+            }).join(', ');
+            
+            alert(`No se puede eliminar la máquina "${maquina.nombre}" porque tiene operarios asignados: ${operariosAsignados}.\n\nPor favor, desasigne los operarios primero.`);
+            return;
+        }
+        
+        // Si no hay operarios asignados, proceder con la confirmación normal
         const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
         document.getElementById('confirmTitle').textContent = 'Eliminar Máquina';
-        document.getElementById('confirmBody').textContent = '¿Está seguro de que desea eliminar esta máquina? Esta acción afectará a los operarios asignados.';
+        document.getElementById('confirmBody').textContent = '¿Está seguro de que desea eliminar esta máquina?';
         
         const btnConfirmar = document.getElementById('btnConfirmar');
         
