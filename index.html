@@ -910,9 +910,44 @@
     <script src="js/navigation.js"></script>
     <!-- Añadir las funciones a los botones -->
     <script src="js/funciones.js"></script>
+    <!-- Script para gestión de operarios -->
+    <script src="js/gestion-operarios.js"></script>
     <!-- Script para gestión de máquinas -->
     <script src="js/maquinas.js"></script>
     <!-- Script para gestión de máquinas en Configuración -->
     <script src="js/gestion-maquinas.js"></script>
+    <!-- Solución global para modales -->
+    <script>
+      // Solución para el problema de modal-backdrop persistente
+      document.addEventListener('DOMContentLoaded', function() {
+        // Agregar event listener a todos los modales para limpiar backdrop
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+          modal.addEventListener('hidden.bs.modal', function() {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+          });
+        });
+        
+        // Función global para limpiar modales desde cualquier lugar
+        window.limpiarModales = function() {
+          const backdrops = document.querySelectorAll('.modal-backdrop');
+          backdrops.forEach(backdrop => backdrop.remove());
+          document.body.classList.remove('modal-open');
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
+        };
+        
+        // Detectar eventos de escape para cerrar modales adecuadamente
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && document.querySelector('.modal.show')) {
+            window.limpiarModales();
+          }
+        });
+      });
+    </script>
 </body>
 </html>
