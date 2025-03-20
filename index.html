@@ -900,22 +900,23 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery - necesario para maquinas.js -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Scripts para exportar o importar información fácilmente a excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Scripts para crear gráficos-->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
-    <!-- Incluir la opción de que se pueda navegar entre secciones -->
+    
+    <!-- Config script - determina si estamos en modo estático o PHP -->
+    <script src="js/config.js"></script>
+    
+    <!-- API Mock para GitHub Pages -->
+    <script src="js/api-mock.js"></script>
+    
+    <!-- Archivos de aplicación -->
     <script src="js/navigation.js"></script>
-    <!-- Añadir las funciones a los botones -->
     <script src="js/funciones.js"></script>
-    <!-- Script para gestión de operarios -->
     <script src="js/gestion-operarios.js"></script>
-    <!-- Script para gestión de máquinas -->
     <script src="js/maquinas.js"></script>
-    <!-- Script para gestión de máquinas en Configuración -->
     <script src="js/gestion-maquinas.js"></script>
+    
     <!-- Solución global para modales -->
     <script>
       // Solución para el problema de modal-backdrop persistente
