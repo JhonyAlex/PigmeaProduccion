@@ -1,35 +1,43 @@
-// ...existing code...
-
 // Variable para almacenar los operarios actuales
 let operariosAsignados = [];
 
+// Evento para el botón de editar máquina
 $(document).on('click', '.btn-editar-maquina', function() {
     const maquinaId = $(this).data('id');
     const nombre = $(this).data('nombre');
     
+    // Limpiar el contenido previo
+    $('#operarios-asignados').empty();
+    
+    // Establecer valores
     $('#editar_maquina_id').val(maquinaId);
     $('#editar_nombre').val(nombre);
     
     // Cargar operarios asignados
     cargarOperariosAsignados(maquinaId);
     
+    // Mostrar el modal
     $('#modalEditarMaquina').modal('show');
 });
 
+// Cargar operarios asignados a una máquina
 function cargarOperariosAsignados(maquinaId) {
     $.ajax({
         url: `/maquinas/${maquinaId}/operarios`,
         type: 'GET',
+        dataType: 'json',
         success: function(response) {
-            operariosAsignados = response.operarios;
+            operariosAsignados = response.operarios || [];
             actualizarListaOperarios();
         },
         error: function(xhr) {
-            console.error('Error al cargar operarios:', xhr.responseText);
+            console.error('Error al cargar operarios:', xhr);
+            alert('Ha ocurrido un error al cargar los operarios asignados.');
         }
     });
 }
 
+// Actualizar la lista de operarios en el modal
 function actualizarListaOperarios() {
     const contenedor = $('#operarios-asignados');
     contenedor.empty();
@@ -55,12 +63,13 @@ function actualizarListaOperarios() {
     contenedor.append(lista);
 }
 
-// Agregar operario
+// Agregar operario - abre el modal de selección
 $(document).on('click', '#btn-agregar-operario', function() {
     cargarOperariosDisponibles();
     $('#modalSeleccionarOperario').modal('show');
 });
 
+// Cargar operarios disponibles para asignar
 function cargarOperariosDisponibles() {
     const maquinaId = $('#editar_maquina_id').val();
     $.ajax({
@@ -82,7 +91,8 @@ function cargarOperariosDisponibles() {
             });
         },
         error: function(xhr) {
-            console.error('Error al cargar operarios disponibles:', xhr.responseText);
+            console.error('Error al cargar operarios disponibles:', xhr);
+            alert('No se pudieron cargar los operarios disponibles.');
         }
     });
 }
@@ -91,7 +101,6 @@ function cargarOperariosDisponibles() {
 $(document).on('click', '#btn-confirmar-operario', function() {
     const operarioId = $('#select-operario').val();
     const operarioNombre = $('#select-operario option:selected').text();
-    const maquinaId = $('#editar_maquina_id').val();
     
     if (!operarioId) return;
     
@@ -112,7 +121,7 @@ $(document).on('click', '.btn-quitar-operario', function() {
     actualizarListaOperarios();
 });
 
-// Modificar el submit del formulario para incluir operarios
+// Manejar el envío del formulario para guardar cambios
 $('#formEditarMaquina').on('submit', function(e) {
     e.preventDefault();
     
@@ -134,10 +143,8 @@ $('#formEditarMaquina').on('submit', function(e) {
             window.location.reload();
         },
         error: function(xhr) {
-            console.error('Error al actualizar máquina:', xhr.responseText);
+            console.error('Error al actualizar máquina:', xhr);
             alert('Ha ocurrido un error al actualizar la máquina.');
         }
     });
 });
-
-// ...existing code...
