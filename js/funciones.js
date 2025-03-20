@@ -681,3 +681,79 @@ document.addEventListener('DOMContentLoaded', function() {
     // Aquí puedes inicializar otros componentes
     // ...existing code...
 });
+
+// Asegurarse de que los botones de configuración se inicialicen correctamente
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar componentes de configuración
+    inicializarBtnReiniciarSistema();
+    inicializarBtnLimpiarRegistros();
+    inicializarBotonesImportacionExportacion();
+    
+    // Elemento específico para el botón de reinicio del sistema
+    const btnReiniciarSistema = document.getElementById('btnReiniciarSistema');
+    if (btnReiniciarSistema) {
+        console.log('Botón reiniciar sistema encontrado, añadiendo event listener');
+        btnReiniciarSistema.addEventListener('click', function() {
+            console.log('Botón de reinicio del sistema clickeado');
+            // Mostrar modal de confirmación
+            const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            document.getElementById('confirmTitle').textContent = 'Reiniciar Sistema';
+            document.getElementById('confirmBody').innerHTML = `
+                <p class="text-danger"><strong>¡ADVERTENCIA!</strong></p>
+                <p>Esta acción eliminará <strong>TODOS</strong> los datos del sistema, incluyendo:</p>
+                <ul>
+                    <li>Operarios</li>
+                    <li>Máquinas</li>
+                    <li>Registros de producción</li>
+                    <li>Configuraciones</li>
+                </ul>
+                <p>Esta acción no se puede deshacer. ¿Está seguro de continuar?</p>
+            `;
+            
+            // Remover listeners previos del botón confirmar
+            const btnConfirmar = document.getElementById('btnConfirmar');
+            const nuevoBtn = btnConfirmar.cloneNode(true);
+            btnConfirmar.parentNode.replaceChild(nuevoBtn, btnConfirmar);
+            
+            // Añadir nuevo listener para ejecutar el reinicio
+            nuevoBtn.addEventListener('click', function() {
+                console.log('Confirmando reinicio del sistema');
+                // Lista de claves específicas de la aplicación para borrar
+                const keysToRemove = [
+                    'operarios',
+                    'maquinas',
+                    'registros',
+                    'configuracion',
+                    'produccion',
+                    'usuarios',
+                    'pedidos',
+                    'turnos',
+                    'reportes',
+                    'ultimosRegistros'
+                    // Añadir cualquier otra clave específica que use la aplicación
+                ];
+                
+                // Borrar elementos específicos del localStorage
+                keysToRemove.forEach(key => {
+                    localStorage.removeItem(key);
+                    console.log(`Eliminada clave: ${key}`);
+                });
+                
+                // Cerrar el modal
+                confirmModal.hide();
+                
+                // Recargar la página para reflejar los cambios
+                setTimeout(() => {
+                    alert('Sistema reiniciado correctamente. La página se recargará.');
+                    window.location.reload();
+                }, 500);
+            });
+            
+            confirmModal.show();
+        });
+    } else {
+        console.warn('Botón reiniciar sistema no encontrado en el DOM');
+    }
+});
+
+// ...existing code...

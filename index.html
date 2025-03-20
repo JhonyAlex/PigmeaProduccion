@@ -683,7 +683,7 @@
                                     <i class="fas fa-eraser me-1"></i>Limpiar Registros Antiguos
                                 </button>
                                 
-                                <button type="button" class="btn btn-outline-danger" id="btnReiniciarSistema">
+                                <button type="button" class="btn btn-outline-danger" id="btnReiniciarSistema">onclick="if(window.reiniciarSistema) window.reiniciarSistema()">
                                     <i class="fas fa-trash-alt me-1"></i>Reiniciar Sistema
                                 </button>
                             </div>
@@ -909,6 +909,9 @@
     
     <!-- API Mock para GitHub Pages -->
     <script src="js/api-mock.js"></script>
+    
+    <!-- Script específico para reinicio del sistema -->
+    <script src="js/sistema-reset.js"></script>
     
     <!-- Archivos de aplicación -->
     <script src="js/navigation.js"></script>

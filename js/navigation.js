@@ -232,3 +232,133 @@ document.addEventListener('DOMContentLoaded', function () {
     updateOperarioReportesSelect();
     updateOperarioBaseDatosSelect();
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar la navegación entre secciones
+    const navLinks = document.querySelectorAll('.nav-link[data-section]');
+    const sections = document.querySelectorAll('section[id$="Section"]');
+    
+    // Establecer la sección activa
+    function setActiveSection(sectionId) {
+        // Ocultar todas las secciones
+        sections.forEach(section => {
+            section.classList.add('d-none');
+        });
+        
+        // Mostrar la sección seleccionada
+        const activeSection = document.getElementById(sectionId);
+        if (activeSection) {
+            activeSection.classList.remove('d-none');
+            console.log(`Sección activa: ${sectionId}`);
+            
+            // Si se navega a la sección de configuración, inicializar explícitamente los botones
+            if (sectionId === 'configuracionSection') {
+                console.log('Inicializando botones de configuración');
+                setTimeout(() => {
+                    const btnReiniciarSistema = document.getElementById('btnReiniciarSistema');
+                    if (btnReiniciarSistema) {
+                        // Eliminar todos los event listeners existentes
+                        const nuevoBtn = btnReiniciarSistema.cloneNode(true);
+                        btnReiniciarSistema.parentNode.replaceChild(nuevoBtn, btnReiniciarSistema);
+                        
+                        // Agregar el nuevo event listener
+                        nuevoBtn.addEventListener('click', function() {
+                            console.log('Evento click en btnReiniciarSistema');
+                            // Mostrar modal de confirmación
+                            const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+                            document.getElementById('confirmTitle').textContent = 'Reiniciar Sistema';
+                            document.getElementById('confirmBody').innerHTML = `
+                                <p class="text-danger"><strong>¡ADVERTENCIA!</strong></p>
+                                <p>Esta acción eliminará <strong>TODOS</strong> los datos del sistema, incluyendo:</p>
+                                <ul>
+                                    <li>Operarios</li>
+                                    <li>Máquinas</li>
+                                    <li>Registros de producción</li>
+                                    <li>Configuraciones</li>
+                                </ul>
+                                <p>Esta acción no se puede deshacer. ¿Está seguro de continuar?</p>
+                            `;
+                            
+                            // Remover listeners previos del botón confirmar
+                            const btnConfirmar = document.getElementById('btnConfirmar');
+                            const nuevoBtnConfirmar = btnConfirmar.cloneNode(true);
+                            btnConfirmar.parentNode.replaceChild(nuevoBtnConfirmar, btnConfirmar);
+                            
+                            // Añadir nuevo listener para ejecutar el reinicio
+                            nuevoBtnConfirmar.addEventListener('click', function() {
+                                // Lista de claves específicas de la aplicación para borrar
+                                localStorage.clear(); // Borrar todo el localStorage
+                                
+                                // Cerrar el modal
+                                confirmModal.hide();
+                                
+                                // Recargar la página para reflejar los cambios
+                                setTimeout(() => {
+                                    alert('Sistema reiniciado correctamente. La página se recargará.');
+                                    window.location.reload();
+                                }, 500);
+                            });
+                            
+                            confirmModal.show();
+                        });
+                        
+                        console.log('Event listener agregado a btnReiniciarSistema');
+                    } else {
+                        console.warn('Botón reiniciar sistema no encontrado');
+                    }
+                    
+                    // Inicializar otros botones específicos de configuración si es necesario
+                }, 100); // Pequeño retraso para asegurar que el DOM está completamente cargado
+            }
+        }
+    }
+    
+    // Manejar clics en los links de navegación
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remover clase activa de todos los links
+            navLinks.forEach(navLink => {
+                navLink.classList.remove('active');
+            });
+            
+            // Agregar clase activa al link actual
+            this.classList.add('active');
+            
+            // Obtener el ID de la sección a mostrar
+            const sectionId = this.getAttribute('data-section');
+            
+            // Actualizar la URL con el fragmento
+            history.pushState(null, null, this.getAttribute('href'));
+            
+            // Activar la sección correspondiente
+            setActiveSection(sectionId);
+        });
+    });
+    
+    // Manejar navegación inicial basada en la URL
+    function handleInitialNavigation() {
+        const hash = window.location.hash || '#dashboard';
+        const matchingLink = document.querySelector(`.nav-link[href="${hash}"]`);
+        
+        if (matchingLink) {
+            matchingLink.classList.add('active');
+            const sectionId = matchingLink.getAttribute('data-section');
+            setActiveSection(sectionId);
+        } else {
+            // Por defecto, mostrar el dashboard
+            const dashboardLink = document.querySelector('.nav-link[href="#dashboard"]');
+            if (dashboardLink) {
+                dashboardLink.classList.add('active');
+                setActiveSection('dashboardSection');
+            }
+        }
+    }
+    
+    // Inicializar la navegación
+    handleInitialNavigation();
+    
+    // Escuchar cambios en la URL (para navegación con los botones atrás/adelante)
+    window.addEventListener('popstate', handleInitialNavigation);
+});
