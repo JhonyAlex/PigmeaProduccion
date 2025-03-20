@@ -72,20 +72,34 @@ document.addEventListener('DOMContentLoaded', function () {
     // Agregar un nuevo operario.
     operarioForm.addEventListener('submit', function (e) {
         e.preventDefault();
+        agregarNuevoOperario();
+    });
+    
+    // Función para manejar la adición de un nuevo operario
+    function agregarNuevoOperario() {
         const nombreOperario = nombreOperarioInput.value.trim();
         const maquinaSeleccionada = maquinaSelect.value;
 
         if (nombreOperario && maquinaSeleccionada) {
             const operarios = getOperarios();
-            operarios.push({ nombre: nombreOperario, maquina: maquinaSeleccionada }); // Ahora guarda un objeto con nombre y máquina
+            operarios.push({ nombre: nombreOperario, maquina: maquinaSeleccionada });
             saveOperarios(operarios);
             nombreOperarioInput.value = '';
             renderOperariosTable();
-
             updateAllOperarioSelects();
-
+        } else {
+            alert("Por favor complete todos los campos requeridos.");
         }
-    });
+    }
+    
+    // Asegurarse de que el botón de agregar operario tenga un event listener
+    const btnAgregarOperario = document.getElementById('btnAgregarOperario');
+    if (btnAgregarOperario) {
+        btnAgregarOperario.addEventListener('click', function(e) {
+            e.preventDefault();
+            agregarNuevoOperario();
+        });
+    }
 
     //Función para actualizar el select de la sección registro
     function updateOperarioSelect() {
