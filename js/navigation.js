@@ -1,6 +1,66 @@
-// js/operarios.js
+// js/navigation.js
 
 document.addEventListener('DOMContentLoaded', function () {
+    // --- Navegación entre secciones ---
+    const navLinks = document.querySelectorAll('.nav-link[data-section]');
+    const sections = document.querySelectorAll('section[id$="Section"]');
+    
+    // Función para mostrar la sección seleccionada y ocultar las demás
+    function showSection(sectionId) {
+        sections.forEach(section => {
+            if (section.id === sectionId) {
+                section.classList.remove('d-none');
+            } else {
+                section.classList.add('d-none');
+            }
+        });
+        
+        // Actualizar clases activas en los enlaces de navegación
+        navLinks.forEach(link => {
+            const linkSection = link.getAttribute('data-section');
+            if (linkSection === sectionId) {
+                link.classList.add('active-section');
+            } else {
+                link.classList.remove('active-section');
+            }
+        });
+    }
+    
+    // Agregar event listeners a los enlaces de navegación
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetSection = this.getAttribute('data-section');
+            
+            // Actualizar la URL sin recargar la página
+            const href = this.getAttribute('href');
+            history.pushState(null, null, href);
+            
+            // Mostrar la sección correspondiente
+            showSection(targetSection);
+        });
+    });
+    
+    // Manejar la navegación con el botón atrás/adelante del navegador
+    window.addEventListener('popstate', function() {
+        // Obtener el hash de la URL actual
+        const hash = window.location.hash || '#dashboard';
+        const sectionId = hash.replace('#', '') + 'Section';
+        
+        // Mostrar la sección correspondiente
+        showSection(sectionId);
+    });
+    
+    // Cargar la sección inicial basada en el hash de la URL
+    function loadInitialSection() {
+        const hash = window.location.hash || '#dashboard';
+        const sectionId = hash.replace('#', '') + 'Section';
+        showSection(sectionId);
+    }
+    
+    // Cargar la sección inicial
+    loadInitialSection();
+
     // --- Gestión de Operarios ---
     const operarioForm = document.getElementById('operarioForm');
     const nombreOperarioInput = document.getElementById('nombreOperario');
