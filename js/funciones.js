@@ -29,11 +29,17 @@ document.addEventListener('DOMContentLoaded', function () {
         tablaOperariosBody.innerHTML = ''; // Limpia el contenido actual de la tabla.
 
         const operarios = getOperarios(); // Obtiene la lista actual de operarios.
+        const maquinasMap = getMaquinasMap(); // Obtiene un mapa de id -> nombre de máquina
+        
         operarios.forEach((operario, index) => {
             const row = document.createElement('tr'); // Crea una nueva fila.
+            
+            // Obtener el nombre de la máquina en lugar de mostrar el ID
+            const nombreMaquina = maquinasMap[operario.maquina] || 'Máquina no encontrada';
+            
             row.innerHTML = `
                 <td>${operario.nombre}</td>
-                <td>${operario.maquina}</td>
+                <td>${nombreMaquina}</td>
                 <td>
                     <button class="btn btn-warning btn-sm btn-editar-operario" data-index="${index}" data-bs-toggle="modal" data-bs-target="#editarOperarioModal">Editar</button>
                     <button class="btn btn-danger btn-sm btn-eliminar-operario" data-index="${index}">Eliminar</button>
@@ -58,6 +64,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 cargarDatosOperario(index);
             });
         });
+    }
+
+    //Función auxiliar para obtener un mapa de ID de máquina a nombre de máquina
+    function getMaquinasMap() {
+        const maquinasMap = {};
+        const maquinas = getMaquinas();
+        
+        maquinas.forEach(maquina => {
+            maquinasMap[maquina.id] = maquina.nombre;
+        });
+        
+        return maquinasMap;
     }
 
     //Función para eliminar operarios
