@@ -8,8 +8,66 @@ use App\Models\User;
 
 class MaquinaController extends Controller
 {
-    // ...existing code...
+    /**
+     * Obtener todas las máquinas
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        try {
+            $maquinas = Maquina::orderBy('nombre')->get();
+            return response()->json(['maquinas' => $maquinas]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al obtener máquinas: ' . $e->getMessage()], 500);
+        }
+    }
+    
+    /**
+     * Guardar una nueva máquina
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:255|unique:maquinas,nombre',
+        ]);
+        
+        try {
+            $maquina = new Maquina();
+            $maquina->nombre = $request->nombre;
+            $maquina->save();
+            
+            return response()->json(['success' => true, 'message' => 'Máquina creada correctamente', 'maquina' => $maquina]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al crear máquina: ' . $e->getMessage()], 500);
+        }
+    }
 
+    /**
+     * Eliminar una máquina
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($id)
+    {
+        try {
+            $maquina = Maquina::findOrFail($id);
+            
+            // Eliminar relaciones primero (opcional, dependiendo de tus restricciones de clave foránea)
+            $maquina->operarios()->detach();
+            
+            $maquina->delete();
+            
+            return response()->json(['success' => true, 'message' => 'Máquina eliminada correctamente']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al eliminar máquina: ' . $e->getMessage()], 500);
+        }
+    }
+    
     /**
      * Obtiene los operarios asignados a una máquina.
      *
@@ -82,6 +140,4 @@ class MaquinaController extends Controller
         
         return response()->json(['success' => true, 'message' => 'Máquina actualizada correctamente']);
     }
-
-    // ...existing code...
 }
