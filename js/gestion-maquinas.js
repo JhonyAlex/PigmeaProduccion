@@ -188,20 +188,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function mostrarOperariosAsignados() {
         operariosAsignadosContainer.innerHTML = '';
-        
+
         const maquina = maquinas.find(m => m.id === maquinaActualId);
         if (!maquina || !maquina.operariosAsignados || maquina.operariosAsignados.length === 0) {
             operariosAsignadosContainer.innerHTML = '<p class="text-muted">No hay operarios asignados</p>';
             return;
         }
-        
+
         const listaOperarios = document.createElement('ul');
         listaOperarios.className = 'list-group';
-        
+
         maquina.operariosAsignados.forEach(operarioId => {
             const operario = operarios.find(op => op.id === operarioId);
             if (!operario) return;
-            
+
             const item = document.createElement('li');
             item.className = 'list-group-item d-flex justify-content-between align-items-center';
             item.innerHTML = `
@@ -212,65 +212,60 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             listaOperarios.appendChild(item);
         });
-        
+
         operariosAsignadosContainer.appendChild(listaOperarios);
     }
-    
+
     function guardarCambiosMaquina(e) {
         e.preventDefault();
-        
+
         if (!maquinaActualId) return;
-        
+
         const nombre = editarNombreInput.value.trim();
         if (!nombre) {
             alert('Por favor, ingrese el nombre de la máquina');
             return;
         }
-        
+
         const maquinaIndex = maquinas.findIndex(m => m.id === maquinaActualId);
         if (maquinaIndex === -1) return;
-        
-        const nombreAnterior = maquinas[maquinaIndex].nombre;
+
+        const nombreAnterior = maquinas[maquinaIndex].nombre;  //Guardo el nombre anterior
         maquinas[maquinaIndex].nombre = nombre;
         localStorage.setItem('maquinas', JSON.stringify(maquinas));
-        
+
         modalEditarMaquina.hide();
-        
-        // Usar la función global de limpieza de modales
+
         if (window.limpiarModales) {
             window.limpiarModales();
         }
-        
+
         maquinaActualId = null;
         actualizarTablaMaquinas();
-        
-        // Si existe el módulo de operarios, actualizar esa información también
+
         if (window.gestionOperarios) {
             window.gestionOperarios.actualizarTablaOperarios();
         }
-        
-        // Mostrar mensaje de confirmación solo si cambió el nombre
+
         if (nombreAnterior !== nombre) {
             alert(`Máquina "${nombreAnterior}" actualizada a "${nombre}" correctamente.`);
         }
     }
-    
+
     function mostrarModalSeleccionarOperario() {
-        // Actualizar el selector antes de mostrar el modal
         actualizarSelectorOperarios();
-        
-        // Verificar si hay operarios disponibles para seleccionar
+
         const hayOperariosDisponibles = Array.from(selectOperario.options)
             .some(option => !option.disabled && option.value);
-        
+
         if (!hayOperariosDisponibles) {
             alert("No hay operarios disponibles para asignar a esta máquina.");
             return;
         }
-        
+
         modalSeleccionarOperario.show();
     }
-    
+
     function agregarOperarioAMaquina() {
         const operarioId = selectOperario.value;
         if (!operarioId || !maquinaActualId) {
@@ -280,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return;
         }
-        
+
         const maquinaIndex = maquinas.findIndex(m => m.id === maquinaActualId);
         if (maquinaIndex === -1) {
             modalSeleccionarOperario.hide();
@@ -289,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return;
         }
-        
+
         // Verificar si el operario ya está asignado a otra máquina
         const operarioData = operarios.find(op => op.id === operarioId);
         if (operarioData && operarioData.maquinaId && operarioData.maquinaId !== maquinaActualId) {
@@ -305,155 +300,157 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
         }
-        
+
         // Inicializar array si no existe
         if (!maquinas[maquinaIndex].operariosAsignados) {
             maquinas[maquinaIndex].operariosAsignados = [];
         }
-        
+
         // Agregar operario si no está ya asignado
         if (!maquinas[maquinaIndex].operariosAsignados.includes(operarioId)) {
             maquinas[maquinaIndex].operariosAsignados.push(operarioId);
-            
+
             // Actualizar también la relación en el operario
             const operariosData = JSON.parse(localStorage.getItem('operarios')) || [];
             const operarioIndex = operariosData.findIndex(op => op.id === operarioId);
-            
+
             if (operarioIndex !== -1) {
                 operariosData[operarioIndex].maquinaId = maquinaActualId;
                 localStorage.setItem('operarios', JSON.stringify(operariosData));
-                
+
                 // Actualizar operarios locales
                 operarios = operariosData;
             }
-            
+
             localStorage.setItem('maquinas', JSON.stringify(maquinas));
             mostrarOperariosAsignados();
+             // Mostrar mensaje de confirmación
+            alert(`Operario "${operarioData.nombre}" asignado a la máquina "${maquinas[maquinaIndex].nombre}"`);
         }
-        
+
         modalSeleccionarOperario.hide();
         if (window.limpiarModales) {
             window.limpiarModales();
         }
     }
-    
+
     function quitarOperarioDeMaquina(operarioId) {
         if (!maquinaActualId) return;
-        
+
         const maquinaIndex = maquinas.findIndex(m => m.id === maquinaActualId);
         if (maquinaIndex === -1) return;
-        
+
         // Quitar operario de la máquina
         if (maquinas[maquinaIndex].operariosAsignados) {
             maquinas[maquinaIndex].operariosAsignados = maquinas[maquinaIndex].operariosAsignados
                 .filter(id => id !== operarioId);
-            
+
             // Actualizar también la relación en el operario
             const operariosData = JSON.parse(localStorage.getItem('operarios')) || [];
             const operarioIndex = operariosData.findIndex(op => op.id === operarioId);
-            
+
             if (operarioIndex !== -1 && operariosData[operarioIndex].maquinaId === maquinaActualId) {
                 operariosData[operarioIndex].maquinaId = '';
                 localStorage.setItem('operarios', JSON.stringify(operariosData));
-                
+
                 // Actualizar operarios locales
                 operarios = operariosData;
             }
-            
+
             localStorage.setItem('maquinas', JSON.stringify(maquinas));
             mostrarOperariosAsignados();
         }
     }
-    
+
     function quitarOperarioDeMaquinaById(maquinaId, operarioId) {
         if (!maquinaId || !operarioId) return;
-        
+
         const maquinaIndex = maquinas.findIndex(m => m.id === maquinaId);
         if (maquinaIndex === -1) return;
-        
+
         // Quitar operario de la máquina
         if (maquinas[maquinaIndex].operariosAsignados) {
             maquinas[maquinaIndex].operariosAsignados = maquinas[maquinaIndex].operariosAsignados
                 .filter(id => id !== operarioId);
-            
+
             localStorage.setItem('maquinas', JSON.stringify(maquinas));
         }
     }
-    
-    function confirmarEliminarMaquina(maquinaId) {
+
+   function confirmarEliminarMaquina(maquinaId) {
         const maquina = maquinas.find(m => m.id === maquinaId);
         if (!maquina) return;
-        
+
         // Verificar si la máquina tiene operarios asignados
-        const tieneOperariosAsignados = maquina.operariosAsignados && 
-                                       maquina.operariosAsignados.length > 0;
-        
+        const tieneOperariosAsignados = maquina.operariosAsignados &&
+                                            maquina.operariosAsignados.length > 0;
+
         if (tieneOperariosAsignados) {
             // Hay operarios asignados, mostrar alerta especial
             const operariosAsignados = maquina.operariosAsignados.map(opId => {
                 const operario = operarios.find(op => op.id === opId);
                 return operario ? operario.nombre : 'Desconocido';
             }).join(', ');
-            
+
             alert(`No se puede eliminar la máquina "${maquina.nombre}" porque tiene operarios asignados: ${operariosAsignados}.\n\nPor favor, desasigne los operarios primero.`);
             return;
         }
-        
+
         // Si no hay operarios asignados, proceder con la confirmación normal
         const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
         document.getElementById('confirmTitle').textContent = 'Eliminar Máquina';
         document.getElementById('confirmBody').textContent = '¿Está seguro de que desea eliminar esta máquina?';
-        
+
         const btnConfirmar = document.getElementById('btnConfirmar');
-        
+
         // Remover listeners previos
         const nuevoBtn = btnConfirmar.cloneNode(true);
         btnConfirmar.parentNode.replaceChild(nuevoBtn, btnConfirmar);
-        
+
         // Agregar nuevo listener
         nuevoBtn.addEventListener('click', function() {
             eliminarMaquina(maquinaId);
             confirmModal.hide();
         });
-        
+
         confirmModal.show();
     }
-    
+
     function eliminarMaquina(maquinaId) {
         const maquina = maquinas.find(m => m.id === maquinaId);
         if (!maquina) return;
-        
+
         // Actualizar operarios relacionados
         if (maquina.operariosAsignados && maquina.operariosAsignados.length > 0) {
             const operariosData = JSON.parse(localStorage.getItem('operarios')) || [];
-            
+
             maquina.operariosAsignados.forEach(operarioId => {
                 const operarioIndex = operariosData.findIndex(op => op.id === operarioId);
-                if (operarioIndex !== -1) {
+                if (operarioIndex !== -1 && operariosData[operarioIndex].maquinaId === maquinaId) { //Verifico que el operario corresponda a la maquina
                     operariosData[operarioIndex].maquinaId = '';
                 }
             });
-            
+
             localStorage.setItem('operarios', JSON.stringify(operariosData));
-            
+
             // Actualizar operarios locales
             operarios = operariosData;
-            
+
             // Si existe el módulo de operarios, actualizar esa información
             if (window.gestionOperarios) {
                 window.gestionOperarios.cargarOperarios();
             }
         }
-        
+
         // Eliminar máquina
         maquinas = maquinas.filter(m => m.id !== maquinaId);
         localStorage.setItem('maquinas', JSON.stringify(maquinas));
-        
+
         // Limpiar cualquier modal abierto
         if (window.limpiarModales) {
             window.limpiarModales();
         }
-        
+
         actualizarTablaMaquinas();
     }
     
