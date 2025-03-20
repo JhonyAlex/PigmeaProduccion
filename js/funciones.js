@@ -254,16 +254,30 @@ function actualizarTablaMaquinas() {
 
 // Función para actualizar los select de máquinas en los formularios
 function actualizarSelectMaquinas() {
-    const selectMaquinas = document.querySelectorAll('select[id$="Maquina"], select[id$="editMaquinaOperario"]'); // Selecciona todos los select que terminen en Maquina o editMaquinaOperario
+    // Selecciona explícitamente todos los selectores necesarios, incluyendo el selector 'maquina'
+    const selectMaquinas = document.querySelectorAll('select[id$="Maquina"], select[id="maquina"], select[id="editMaquinaOperario"]');
+    
     selectMaquinas.forEach(select => {
+        const valorActual = select.value; // Guardar el valor actual si es necesario mantenerlo
         select.innerHTML = '<option value="">Seleccione...</option>'; // Limpiar el select
+        
         maquinas.forEach(maquina => {
             const option = document.createElement('option');
             option.value = maquina.id;
             option.textContent = maquina.nombre;
+            // Opcionalmente, mantener la selección actual si coincide con alguna máquina
+            if (valorActual === maquina.id) {
+                option.selected = true;
+            }
             select.appendChild(option);
         });
     });
+    
+    // Asegurarse de que el primer selector tenga un texto diferente si es necesario
+    const maquinaSelect = document.getElementById('maquina');
+    if (maquinaSelect && maquinaSelect.options[0]) {
+        maquinaSelect.options[0].text = "Seleccionar Máquina...";
+    }
 }
 
 // Función para generar un ID único
