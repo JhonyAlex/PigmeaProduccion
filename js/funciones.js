@@ -66,9 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
         operarios.splice(index, 1); // Elimina el operario en la posición 'index'.
         saveOperarios(operarios); // Guarda la lista actualizada en localStorage.
         renderOperariosTable(); // Vuelve a renderizar la tabla para mostrar los cambios.
-        updateOperarioSelect();
-        updateOperarioReportesSelect();
-        updateOperarioBaseDatosSelect();
+        updateAllOperarioSelects();
     }
 
     // Agregar un nuevo operario.
@@ -84,9 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
             nombreOperarioInput.value = '';
             renderOperariosTable();
 
-            updateOperarioSelect();
-            updateOperarioReportesSelect();
-            updateOperarioBaseDatosSelect();
+            updateAllOperarioSelects();
 
         }
     });
@@ -94,40 +90,65 @@ document.addEventListener('DOMContentLoaded', function () {
     //Función para actualizar el select de la sección registro
     function updateOperarioSelect() {
         const selectOperario = document.getElementById('operario');
-        selectOperario.innerHTML = '<option value="">Seleccionar...</option>';
-        const operarios = getOperarios();
-        operarios.forEach(operario => {
-            const option = document.createElement('option');
-            option.value = operario.nombre;
-            option.text = operario.nombre;
-            selectOperario.appendChild(option);
-        });
+        if (selectOperario) {
+            const valorActual = selectOperario.value; // Guardar valor actual
+            selectOperario.innerHTML = '<option value="">Seleccionar...</option>';
+            const operarios = getOperarios();
+            operarios.forEach(operario => {
+                const option = document.createElement('option');
+                option.value = operario.nombre;
+                option.text = operario.nombre;
+                if (valorActual === operario.nombre) {
+                    option.selected = true;
+                }
+                selectOperario.appendChild(option);
+            });
+        }
     }
 
     //Función para actualizar el select de la sección reportes
     function updateOperarioReportesSelect() {
         const selectOperario = document.getElementById('reporteOperario');
-        selectOperario.innerHTML = '<option value="">Todos</option>';
-        const operarios = getOperarios();
-        operarios.forEach(operario => {
-            const option = document.createElement('option');
-            option.value = operario.nombre;
-            option.text = operario.nombre;
-            selectOperario.appendChild(option);
-        });
+        if (selectOperario) {
+            const valorActual = selectOperario.value; // Guardar valor actual
+            selectOperario.innerHTML = '<option value="">Todos</option>';
+            const operarios = getOperarios();
+            operarios.forEach(operario => {
+                const option = document.createElement('option');
+                option.value = operario.nombre;
+                option.text = operario.nombre;
+                if (valorActual === operario.nombre) {
+                    option.selected = true;
+                }
+                selectOperario.appendChild(option);
+            });
+        }
     }
 
     //Función para actualizar el select de la sección baseDatos
     function updateOperarioBaseDatosSelect() {
         const selectOperario = document.getElementById('filtroOperario');
-        selectOperario.innerHTML = '<option value="">Todos los Operarios</option>';
-        const operarios = getOperarios();
-        operarios.forEach(operario => {
-            const option = document.createElement('option');
-            option.value = operario.nombre;
-            option.text = operario.nombre;
-            selectOperario.appendChild(option);
-        });
+        if (selectOperario) {
+            const valorActual = selectOperario.value; // Guardar valor actual
+            selectOperario.innerHTML = '<option value="">Todos los Operarios</option>';
+            const operarios = getOperarios();
+            operarios.forEach(operario => {
+                const option = document.createElement('option');
+                option.value = operario.nombre;
+                option.text = operario.nombre;
+                if (valorActual === operario.nombre) {
+                    option.selected = true;
+                }
+                selectOperario.appendChild(option);
+            });
+        }
+    }
+
+    // Función para actualizar todos los selectores de operarios a la vez
+    function updateAllOperarioSelects() {
+        updateOperarioSelect();
+        updateOperarioReportesSelect();
+        updateOperarioBaseDatosSelect();
     }
 
     //Modal editar operario
@@ -153,9 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
         saveOperarios(operarios);
 
         renderOperariosTable();
-        updateOperarioSelect();
-        updateOperarioReportesSelect();
-        updateOperarioBaseDatosSelect();
+        updateAllOperarioSelects();
 
         const modal = bootstrap.Modal.getInstance(editarOperarioModal);
         modal.hide();
