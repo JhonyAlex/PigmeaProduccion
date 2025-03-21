@@ -78,10 +78,41 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.paddingRight = '';
     }
     
-    function cargarMaquinas() {
-        maquinas = JSON.parse(localStorage.getItem('maquinas')) || [];
-        actualizarTablaMaquinas();
+   // REEMPLAZAR la función cargarMaquinas en gestion-maquinas.js
+function cargarMaquinas() {
+    const maquinas = JSON.parse(localStorage.getItem('maquinas')) || [];
+    const tablaMaquinas = document.getElementById('tablaMaquinas');
+    
+    if (maquinas.length === 0) {
+        tablaMaquinas.innerHTML = '<tr><td colspan="4" class="text-center">No hay máquinas registradas</td></tr>';
+        return;
     }
+    
+    let html = '';
+    maquinas.forEach(maquina => {
+        // Contar operarios asignados
+        const cantidadOperarios = maquina.operariosAsignados ? maquina.operariosAsignados.length : 0;
+        const badgeClass = cantidadOperarios > 0 ? 'bg-success' : 'bg-secondary';
+        
+        html += `
+            <tr>
+                <td>${maquina.nombre}</td>
+                <td>${maquina.descripcion || 'Sin descripción'}</td>
+                <td><span class="badge ${badgeClass}">${cantidadOperarios} operario(s)</span></td>
+                <td>
+                    <button class="btn btn-sm btn-primary editar-maquina" data-id="${maquina.id}">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="btn btn-sm btn-danger eliminar-maquina" data-id="${maquina.id}">
+                        <i class="fas fa-trash-alt"></i> Eliminar
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tablaMaquinas.innerHTML = html;
+}
     
     function cargarOperarios() {
         operarios = JSON.parse(localStorage.getItem('operarios')) || [];
