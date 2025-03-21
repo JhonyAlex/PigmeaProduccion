@@ -130,6 +130,141 @@ document.addEventListener('DOMContentLoaded', function() {
                 );
             }
         }
+
+
+
+// === NUEVAS FUNCIONES PARA AGREGAR A gestion-maquinas.js ===
+
+// Función para mostrar alertas (si no existe)
+function mostrarAlerta(mensaje, tipo) {
+    const alertaDiv = document.createElement('div');
+    alertaDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
+    alertaDiv.role = 'alert';
+    alertaDiv.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    `;
+    
+    // Insertar alerta en el DOM (ajusta el selector según tu HTML)
+    document.querySelector('#alertas').appendChild(alertaDiv);
+    
+    // Auto-ocultar después de 3 segundos
+    setTimeout(() => {
+        alertaDiv.remove();
+    }, 3000);
+}
+
+// Función para actualizar la lista de operarios asignados 
+function actualizarListaOperariosAsignados(maquinaId) {
+    const maquinas = JSON.parse(localStorage.getItem('maquinas')) || [];
+    const operarios = JSON.parse(localStorage.getItem('operarios')) || [];
+    const maquina = maquinas.find(m => m.id === maquinaId);
+    
+    if (!maquina || !maquina.operariosAsignados || maquina.operariosAsignados.length === 0) {
+        $('#listaOperariosAsignados').html('<p>No hay operarios asignados a esta máquina</p>');
+        return;
+    }
+    
+    let html = '<ul class="list-group">';
+    maquina.operariosAsignados.forEach(operarioId => {
+        const operario = operarios.find(o => o.id === operarioId);
+        if (operario) {
+            html += `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${operario.nombre}
+                    <button class="btn btn-sm btn-danger remover-operario" data-operario-id="${operario.id}" data-maquina-id="${maquinaId}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </li>
+            `;
+        }
+    });
+    html += '</ul>';
+    
+    $('#listaOperariosAsignados').html(html);
+    
+    // Asignar evento a los botones de remover
+    $('.remover-operario').on('click', function() {
+        const operarioId = $(this).data('operario-id');
+        const maquinaId = $(this).data('maquina-id');
+        desasignarOperario(operarioId, maquinaId);
+    });
+}
+
+// Función para actualizar el selector de operarios disponibles
+function actualizarSelectorOperariosDisponibles(maquinaId) {
+    const operarios = JSON.parse(localStorage.getItem('operarios')) || [];
+    const maquinas = JSON.parse(localStorage.getItem('maquinas')) || [];
+    
+    // Limpiar selector
+    $('#selectOperarios').empty();
+    $('#selectOperarios').append('<option value="">Seleccione un operario</option>');
+    
+    // Filtrar operarios disponibles
+    const operariosDisponibles = operarios.filter(operario => {
+        // Si no tiene máquina asignada, está disponible
+        if (!operario.maquinaAsignada) return true;
+        
+        // Si ya está asignado a esta máquina, mostrarlo también
+        return operario.maquinaAsignada === maquinaId;
+    });
+    
+    if (operariosDisponibles.length === 0) {
+        $('#selectOperarios').append('<option disabled>No hay operarios disponibles</option>');
+        $('#btnAgregarOperarioAMaquina').prop('disabled', true);
+    } else {
+        operariosDisponibles.forEach(operario => {
+            $('#selectOperarios').append(`<option value="${operario.id}">${operario.nombre}</option>`);
+        });
+        $('#btnAgregarOperarioAMaquina').prop('disabled', false);
+    }
+}
+
+// Función para desasignar un operario de una máquina
+function desasignarOperario(operarioId, maquinaId) {
+    if (confirm('¿Está seguro de que desea remover este operario de la máquina?')) {
+        let maquinas = JSON.parse(localStorage.getItem('maquinas')) || [];
+        let operarios = JSON.parse(localStorage.getItem('operarios')) || [];
+        
+        // Encontrar la máquina y el operario
+        const maquina = maquinas.find(m => m.id === maquinaId);
+        const operario = operarios.find(o => o.id === operarioId);
+        
+        if (maquina && operario) {
+            // Remover operario de la máquina
+            if (maquina.operariosAsignados) {
+                maquina.operariosAsignados = maquina.operariosAsignados.filter(
+                    id => id !== operarioId
+                );
+            }
+            
+            // Quitar referencia de la máquina en el operario
+            delete operario.maquinaAsignada;
+            
+            // Guardar cambios
+            localStorage.setItem('maquinas', JSON.stringify(maquinas));
+            localStorage.setItem('operarios', JSON.stringify(operarios));
+            
+            // Actualizar la interfaz
+            actualizarListaOperariosAsignados(maquinaId);
+            actualizarSelectorOperariosDisponibles(maquinaId);
+            
+            mostrarAlerta('Operario removido de la máquina correctamente', 'success');
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
         
         // Ordenar los operarios por nombre para mejor usabilidad
         operariosNoAsignados.sort((a, b) => a.nombre.localeCompare(b.nombre));

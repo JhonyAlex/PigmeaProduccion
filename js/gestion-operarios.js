@@ -53,11 +53,54 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Funciones
-    function cargarOperarios() {
-        // Recuperar operarios del localStorage o inicializar
-        operarios = JSON.parse(localStorage.getItem('operarios')) || [];
-        actualizarTablaOperarios();
+// MODIFICA la función cargarOperarios para corregir la visualización de máquinas asignadas
+function cargarOperarios() {
+    const operarios = JSON.parse(localStorage.getItem('operarios')) || [];
+    const tablaOperarios = document.getElementById('tablaOperarios');
+    
+    if (operarios.length === 0) {
+        tablaOperarios.innerHTML = '<tr><td colspan="4" class="text-center">No hay operarios registrados</td></tr>';
+        return;
     }
+    
+    let html = '';
+    operarios.forEach(operario => {
+        // Obtener el nombre de la máquina asignada, si existe
+        let maquinaAsignada = 'No asignado';
+        
+        if (operario.maquinaAsignada) {
+            const maquinas = JSON.parse(localStorage.getItem('maquinas')) || [];
+            const maquina = maquinas.find(m => m.id === operario.maquinaAsignada);
+            if (maquina) {
+                maquinaAsignada = maquina.nombre;
+            } else {
+                // La máquina ya no existe, corregir la referencia
+                maquinaAsignada = 'Máquina no encontrada';
+                
+                // Actualizar operario para eliminar la referencia a una máquina que ya no existe
+                operario.maquinaAsignada = null;
+                localStorage.setItem('operarios', JSON.stringify(operarios));
+            }
+        }
+        
+        html += `
+            <tr>
+                <td>${operario.nombre}</td>
+                <td>${maquinaAsignada}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary editar-operario" data-id="${operario.id}">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="btn btn-sm btn-danger eliminar-operario" data-id="${operario.id}">
+                        <i class="fas fa-trash-alt"></i> Eliminar
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tablaOperarios.innerHTML = html;
+}
     
     function cargarMaquinasParaSelect() {
         // Recuperar máquinas del localStorage
@@ -183,89 +226,142 @@ document.addEventListener('DOMContentLoaded', function() {
         actualizarTablaOperarios();
     }
     
-    function editarOperario(operarioId) {
-        const operario = operarios.find(op => op.id === operarioId);
-        if (!operario) return;
-        
-        operarioIdActual = operarioId;
-        editNombreOperarioInput.value = operario.nombre;
-        editMaquinaOperarioSelect.value = operario.maquinaId || '';
-        
-        editarOperarioModal.show();
-    }
+// AGREGA o MODIFICA la función para desasignar operarios si existe
+function desasignarOperario(operarioId, maquinaId) {
+    let maquinas = JSON.parse(localStorage.getItem('maquinas')) || [];
+    let operarios = JSON.parse(localStorage.getItem('operarios')) || [];
     
-    function guardarCambiosOperario(e) {
-        e.preventDefault();
-        
-        if (!operarioIdActual) return;
-        
-        const nombre = editNombreOperarioInput.value.trim();
-        const maquinaId = editMaquinaOperarioSelect.value;
-        
-        if (!nombre) {
-            alert('Por favor, ingrese el nombre del operario');
-            return;
+    // Encontrar la máquina y el operario
+    const maquina = maquinas.find(m => m.id === maquinaId);
+    const operario = operarios.find(o => o.id === operarioId);
+    
+    if (maquina && operario) {
+        // Remover operario de la máquina
+        if (maquina.operariosAsignados) {
+            maquina.operariosAsignados = maquina.operariosAsignados.filter(
+                id => id !== operarioId
+            );
         }
         
-        const operarioIndex = operarios.findIndex(op => op.id === operarioIdActual);
-        if (operarioIndex === -1) return;
+        // Quitar referencia de la máquina en el operario
+        delete operario.maquinaAsignada;
         
-        const operarioAnterior = operarios[operarioIndex];
-        const maquinaIdAnterior = operarioAnterior.maquinaId;
+        // Guardar cambios
+        localStorage.setItem('maquinas', JSON.stringify(maquinas));
+        localStorage.setItem('operarios', JSON.stringify(operarios));
         
-        // Actualizar operario
-        operarios[operarioIndex] = {
-            ...operarioAnterior,
+        return true;
+    }
+    
+    return false;
+}
+
+
+
+
+
+    // REEMPLAZA el evento para guardar la edición del operario:
+$('#btnGuardarEdicionOperario').on('click', function() {
+    const id = $('#editOperarioId').val();
+    const nombre = $('#editOperarioNombre').val().trim();
+    
+    if (!nombre) {
+        mostrarAlerta('Por favor ingrese un nombre para el operario', 'warning');
+        return;
+    }
+    
+    let operarios = JSON.parse(localStorage.getItem('operarios')) || [];
+    const index = operarios.findIndex(o => o.id === id);
+    
+    if (index !== -1) {
+        // Mantener la máquina asignada si existe
+        const maquinaAsignada = operarios[index].maquinaAsignada;
+        
+        operarios[index] = {
+            id: id,
             nombre: nombre,
-            maquinaId: maquinaId
+            maquinaAsignada: maquinaAsignada
         };
         
         localStorage.setItem('operarios', JSON.stringify(operarios));
+        cargarOperarios();
+        $('#modalEditarOperario').modal('hide');
         
-        // Si cambió la máquina, actualizar relaciones
-        if (maquinaIdAnterior !== maquinaId) {
-            // Si tenía una máquina asignada antes, quitar la relación
-            if (maquinaIdAnterior) {
-                quitarRelacionMaquinaOperario(maquinaIdAnterior, operarioIdActual);
+        mostrarAlerta('Operario actualizado correctamente', 'success');
+    }
+});
+    
+// AGREGA este código para limpiar correctamente los modales
+$('#modalEditarOperario').on('hidden.bs.modal', function () {
+    // Limpiar el contenido del modal cuando se cierra
+    $('#editOperarioNombre').val('');
+    $('#editOperarioId').val('');
+    
+    // Eliminar cualquier modal-backdrop adicional
+    $('.modal-backdrop').remove();
+    $('body').removeClass('modal-open');
+    $('body').css('padding-right', '');
+});
+
+// Si tienes un modal para asignar máquinas, también agrega esto:
+$('#modalAsignarMaquina').on('hidden.bs.modal', function () {
+    $('#selectMaquinas').empty();
+    $('#operarioAsignarId').val('');
+    
+    // Eliminar cualquier modal-backdrop adicional
+    $('.modal-backdrop').remove();
+    $('body').removeClass('modal-open');
+    $('body').css('padding-right', '');
+});
+
+
+
+
+
+
+
+    // REEMPLAZA el evento para eliminar un operario con este código actualizado:
+$(document).on('click', '.eliminar-operario', function() {
+    const operarioId = $(this).data('id');
+    
+    if (confirm('¿Está seguro de que desea eliminar este operario? Esta acción no se puede deshacer.')) {
+        let operarios = JSON.parse(localStorage.getItem('operarios')) || [];
+        let maquinas = JSON.parse(localStorage.getItem('maquinas')) || [];
+        
+        // Encontrar el operario a eliminar
+        const operarioIndex = operarios.findIndex(o => o.id === operarioId);
+        
+        if (operarioIndex !== -1) {
+            const operario = operarios[operarioIndex];
+            
+            // Si el operario está asignado a una máquina, actualizar la máquina
+            if (operario.maquinaAsignada) {
+                const maquina = maquinas.find(m => m.id === operario.maquinaAsignada);
+                
+                if (maquina && maquina.operariosAsignados) {
+                    // Eliminar el operario de la lista de operarios asignados
+                    maquina.operariosAsignados = maquina.operariosAsignados.filter(
+                        id => id !== operarioId
+                    );
+                    
+                    // Guardar los cambios en las máquinas
+                    localStorage.setItem('maquinas', JSON.stringify(maquinas));
+                }
             }
             
-            // Si tiene una nueva máquina asignada, crear la relación
-            if (maquinaId) {
-                actualizarRelacionMaquinaOperario(maquinaId, operarioIdActual);
-            }
+            // Eliminar el operario del array
+            operarios.splice(operarioIndex, 1);
+            
+            // Guardar el array actualizado en localStorage
+            localStorage.setItem('operarios', JSON.stringify(operarios));
+            
+            // Actualizar la tabla
+            cargarOperarios();
+            
+            mostrarAlerta('Operario eliminado correctamente', 'success');
         }
-        
-        operarioIdActual = null;
-        editarOperarioModal.hide();
-        
-        // Usar la función global de limpieza de modales
-        if (window.limpiarModales) {
-            window.limpiarModales();
-        }
-        
-        actualizarTablaOperarios();
-        sincronizarConModuloMaquinas();
     }
-    
-    function confirmarEliminarOperario(operarioId) {
-        const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
-        document.getElementById('confirmTitle').textContent = 'Eliminar Operario';
-        document.getElementById('confirmBody').textContent = '¿Está seguro de que desea eliminar este operario?';
-        
-        const btnConfirmar = document.getElementById('btnConfirmar');
-        
-        // Remover listeners previos
-        const nuevoBtn = btnConfirmar.cloneNode(true);
-        btnConfirmar.parentNode.replaceChild(nuevoBtn, btnConfirmar);
-        
-        // Agregar nuevo listener
-        nuevoBtn.addEventListener('click', function() {
-            eliminarOperario(operarioId);
-            confirmModal.hide();
-        });
-        
-        confirmModal.show();
-    }
+});
     
     function eliminarOperario(operarioId) {
         const operario = operarios.find(op => op.id === operarioId);
