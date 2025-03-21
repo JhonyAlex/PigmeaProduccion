@@ -2,6 +2,24 @@
 body {
     background-color: #f8f9fa;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Solución para el problema de modal-backdrop persistente */
+body.modal-open {
+    overflow: hidden;
+    padding-right: 0 !important;
+}
+
+/* Asegurar que el backdrop desaparezca correctamente */
+.modal-backdrop {
+    z-index: 1040;
+}
+
+.modal {
+    z-index: 1050;
 }
 
 /* Variables CSS para colores y valores comunes */
@@ -66,7 +84,8 @@ body {
 .card {
     transition: transform var(--transition-speed) ease, 
                 box-shadow var(--transition-speed) ease;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 .card:hover {
@@ -135,4 +154,52 @@ body {
     .container-fluid.mt-3 {
         margin-top: 1rem !important;
     }
+}
+
+/* Mejoras visuales para los módulos de gestión */
+.list-group-item {
+    transition: background-color 0.2s;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Mejoras en los botones de acción */
+.btn-editar-operario,
+.btn-eliminar-operario,
+.btn-editar-maquina,
+.btn-eliminar-maquina,
+.btn-quitar-operario {
+    transition: transform 0.2s;
+}
+
+.btn-editar-operario:hover,
+.btn-eliminar-operario:hover,
+.btn-editar-maquina:hover,
+.btn-eliminar-maquina:hover,
+.btn-quitar-operario:hover {
+    transform: scale(1.1);
+}
+
+/* Secciones principales */
+section {
+    padding-bottom: 2rem;
+}
+
+/* Estilos para la tabla de operarios y máquinas */
+#tablaOperarios tbody tr,
+#tablaMaquinas tbody tr {
+    transition: background-color 0.2s;
+}
+
+#tablaOperarios tbody tr:hover,
+#tablaMaquinas tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Indicación visual de que un operario está asignado a una máquina */
+.operario-asignado {
+    color: #198754;
+    font-weight: 500;
 }
