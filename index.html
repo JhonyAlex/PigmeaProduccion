@@ -904,54 +904,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
     
-    <!-- Config script - determina si estamos en modo estático o PHP -->
-    <script src="js/config.js"></script>
-    
-    <!-- API Mock para GitHub Pages -->
-    <script src="js/api-mock.js"></script>
-    
-    <!-- Script específico para reinicio del sistema -->
-    <script src="js/sistema-reset.js"></script>
-    
     <!-- Archivos de aplicación -->
-    <script src="js/navigation.js"></script>
-    <script src="js/funciones.js"></script>
-    <script src="js/gestion-operarios.js"></script>
-    <script src="js/maquinas.js"></script>
-    <script src="js/gestion-maquinas.js"></script>
+    <script src="js/navigation.js"></script> <!-- Navegación entre secciones -->
     
-    <!-- Solución global para modales -->
-    <script>
-      // Solución para el problema de modal-backdrop persistente
-      document.addEventListener('DOMContentLoaded', function() {
-        // Agregar event listener a todos los modales para limpiar backdrop
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => {
-          modal.addEventListener('hidden.bs.modal', function() {
-            const backdrops = document.querySelectorAll('.modal-backdrop');
-            backdrops.forEach(backdrop => backdrop.remove());
-            document.body.classList.remove('modal-open');
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
-          });
-        });
-        
-        // Función global para limpiar modales desde cualquier lugar
-        window.limpiarModales = function() {
-          const backdrops = document.querySelectorAll('.modal-backdrop');
-          backdrops.forEach(backdrop => backdrop.remove());
-          document.body.classList.remove('modal-open');
-          document.body.style.overflow = '';
-          document.body.style.paddingRight = '';
-        };
-        
-        // Detectar eventos de escape para cerrar modales adecuadamente
-        document.addEventListener('keydown', function(e) {
-          if (e.key === 'Escape' && document.querySelector('.modal.show')) {
-            window.limpiarModales();
-          }
-        });
-      });
-    </script>
 </body>
 </html>
