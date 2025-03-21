@@ -77,9 +77,33 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = '';
         document.body.style.paddingRight = '';
     }
+
+
+
+
+// Evento para editar una máquina
+$(document).on('click', '.editar-maquina', function() {
+    const maquinaId = $(this).data('id');
+    const maquinas = JSON.parse(localStorage.getItem('maquinas')) || [];
+    const maquina = maquinas.find(m => m.id === maquinaId);
+    
+    if (maquina) {
+        $('#editMaquinaId').val(maquina.id);
+        $('#editMaquinaNombre').val(maquina.nombre);
+        $('#editMaquinaDescripcion').val(maquina.descripcion || '');
+        
+        // Actualizar la lista de operarios asignados
+        actualizarListaOperariosAsignados(maquina.id);
+        
+        $('#modalEditarMaquina').modal('show');
+    }
+});
+
+
+
     
    // REEMPLAZAR la función cargarMaquinas en gestion-maquinas.js
-function cargarMaquinas() {
+   function cargarMaquinas() {
     const maquinas = JSON.parse(localStorage.getItem('maquinas')) || [];
     const tablaMaquinas = document.getElementById('tablaMaquinas');
     
@@ -162,7 +186,23 @@ function cargarMaquinas() {
             }
         }
 
-
+// Evento para abrir el modal de selección de operarios
+$('#btnSeleccionarOperario').on('click', function() {
+    const maquinaId = $('#editMaquinaId').val();
+    
+    if (!maquinaId) {
+        mostrarAlerta('Error: No se puede identificar la máquina', 'danger');
+        return;
+    }
+    
+    // Actualizar el selector de operarios disponibles
+    actualizarSelectorOperariosDisponibles(maquinaId);
+    
+    // Establecer el ID de la máquina en el botón para agregar operarios
+    $('#btnAgregarOperarioAMaquina').data('maquina-id', maquinaId);
+    
+    $('#modalSeleccionarOperario').modal('show');
+});
 
 // === NUEVAS FUNCIONES PARA AGREGAR A gestion-maquinas.js ===
 
