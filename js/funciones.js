@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // js/funciones.js
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -781,3 +782,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ...existing code...
+=======
+>>>>>>> parent of 60b2399 (Revert "ORganización de funciones")
