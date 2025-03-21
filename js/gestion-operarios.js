@@ -169,6 +169,20 @@ function cargarOperarios() {
         // Actualizar también el selector de operarios en la sección Registro
         actualizarSelectorOperariosRegistro();
     }
+
+    function editarOperario(operarioId) {
+        const operario = operarios.find(op => op.id === operarioId);
+        if (!operario) return;
+        
+        operarioIdActual = operarioId;
+        editNombreOperarioInput.value = operario.nombre;
+        
+        // Cargar y seleccionar la máquina del operario
+        cargarMaquinasParaSelect();
+        editMaquinaOperarioSelect.value = operario.maquinaId || ''; // Asegúrate de que el select tenga un valor
+        
+        editarOperarioModal.show();
+    }
     
     function actualizarSelectorOperariosRegistro() {
         const selectorOperario = document.getElementById('operario');
@@ -261,35 +275,58 @@ function desasignarOperario(operarioId, maquinaId) {
 
 
     // REEMPLAZA el evento para guardar la edición del operario:
-$('#btnGuardarEdicionOperario').on('click', function() {
-    const id = $('#editOperarioId').val();
-    const nombre = $('#editOperarioNombre').val().trim();
-    
-    if (!nombre) {
-        mostrarAlerta('Por favor ingrese un nombre para el operario', 'warning');
-        return;
-    }
-    
-    let operarios = JSON.parse(localStorage.getItem('operarios')) || [];
-    const index = operarios.findIndex(o => o.id === id);
-    
-    if (index !== -1) {
-        // Mantener la máquina asignada si existe
-        const maquinaAsignada = operarios[index].maquinaAsignada;
+    $('#btnGuardarEdicionOperario').on('click', function() {
+        const id = $('#editOperarioId').val();
+        const nombre = $('#editOperarioNombre').val().trim();
+        const maquinaId = editMaquinaOperarioSelect.value; // Obtener la máquina seleccionada
         
-        operarios[index] = {
-            id: id,
-            nombre: nombre,
-            maquinaAsignada: maquinaAsignada
-        };
+        if (!nombre) {
+            mostrarAlerta('Por favor ingrese un nombre para el operario', 'warning');
+            return;
+        }
         
-        localStorage.setItem('operarios', JSON.stringify(operarios));
-        cargarOperarios();
-        $('#modalEditarOperario').modal('hide');
+        let operarios = JSON.parse(localStorage.getItem('operarios')) || [];
+        const index = operarios.findIndex(o => o.id === id);
         
-        mostrarAlerta('Operario actualizado correctamente', 'success');
-    }
-});
+        if (index !== -1) {
+            const operarioAnterior = operarios[index]; // Guardar datos del operario antes de la modificación
+            
+            // Actualizar nombre y máquina asignada
+            operarios[index] = {
+                id: id,
+                nombre: nombre,
+                maquinaId: maquinaId  // Actualizar con el ID de la máquina
+            };
+            
+            localStorage.setItem('operarios', JSON.stringify(operarios));
+            
+            // Actualizar la máquina en la tabla de máquinas
+            actualizarRelacionMaquinaOperario(maquinaId, id);
+            
+            cargarOperarios();
+            actualizarTablaOperarios();
+            editarOperarioModal.hide();
+            
+            // Mostrar alerta de éxito
+            mostrarAlerta('Operario actualizado correctamente', 'success');
+            
+            // Si la máquina asignada ha cambiado, mostrar un mensaje informativo
+            if (operarioAnterior.maquinaId !== maquinaId) {
+                const maquinaAnteriorObj = maquinas.find(m => m.id === operarioAnterior.maquinaId);
+                const maquinaNuevaObj = maquinas.find(m => m.id === maquinaId);
+                
+                let mensaje = `Operario "${nombre}"`;
+                if (maquinaAnteriorObj) {
+                    mensaje += ` desasignado de la máquina "${maquinaAnteriorObj.nombre}"`;
+                }
+                if (maquinaNuevaObj) {
+                    mensaje += ` y asignado a la máquina "${maquinaNuevaObj.nombre}"`;
+                }
+                mensaje += ".";
+                alert(mensaje); // Usar alert para mantener la consistencia con otros mensajes
+            }
+        }
+    });
     
 // AGREGA este código para limpiar correctamente los modales
 $('#modalEditarOperario').on('hidden.bs.modal', function () {
@@ -380,21 +417,33 @@ $(document).on('click', '.eliminar-operario', function() {
     }
     
     function actualizarRelacionMaquinaOperario(maquinaId, operarioId) {
-        // Esta función asigna un operario a una máquina
         const maquinas = JSON.parse(localStorage.getItem('maquinas')) || [];
         const maquinaIndex = maquinas.findIndex(m => m.id === maquinaId);
-        
+        const operarios = JSON.parse(localStorage.getItem('operarios')) || [];
+        const operarioIndexEnOperarios = operarios.findIndex(o => o.id === operarioId);
+    
         if (maquinaIndex !== -1) {
-            // Crear un array de operarios asignados si no existe
+            // Primero, quitar el operario de cualquier máquina a la que esté asignado
+            maquinas.forEach(maq => {
+                if (maq.operariosAsignados && maq.operariosAsignados.includes(operarioId)) {
+                    maq.operariosAsignados = maq.operariosAsignados.filter(id => id !== operarioId);
+                }
+            });
+    
+            // Luego, asignar el operario a la nueva máquina
             if (!maquinas[maquinaIndex].operariosAsignados) {
                 maquinas[maquinaIndex].operariosAsignados = [];
             }
-            
-            // Agregar el operario si no está ya asignado
             if (!maquinas[maquinaIndex].operariosAsignados.includes(operarioId)) {
                 maquinas[maquinaIndex].operariosAsignados.push(operarioId);
-                localStorage.setItem('maquinas', JSON.stringify(maquinas));
             }
+    
+            localStorage.setItem('maquinas', JSON.stringify(maquinas));
+        }
+    
+        if (operarioIndexEnOperarios !== -1) {
+            operarios[operarioIndexEnOperarios].maquinaId = maquinaId;
+            localStorage.setItem('operarios', JSON.stringify(operarios));
         }
     }
     

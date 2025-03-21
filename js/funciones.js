@@ -81,10 +81,21 @@ document.addEventListener('DOMContentLoaded', function () {
     //Función para eliminar operarios
     function eliminarOperario(index) {
         let operarios = getOperarios(); // Obtiene la lista actual de operarios.
-        operarios.splice(index, 1); // Elimina el operario en la posición 'index'.
+        const operarioEliminado = operarios.splice(index, 1)[0]; // Elimina el operario en la posición 'index' y obtiene el operario eliminado.
         saveOperarios(operarios); // Guarda la lista actualizada en localStorage.
         renderOperariosTable(); // Vuelve a renderizar la tabla para mostrar los cambios.
         updateAllOperarioSelects();
+
+        // Actualizar la máquina del operario eliminado
+        if (operarioEliminado && operarioEliminado.maquina) {
+            const maquinas = getMaquinas();
+            const maquinaIndex = maquinas.findIndex(m => m.id === operarioEliminado.maquina);
+            if (maquinaIndex !== -1) {
+                // Filtra el operario eliminado de la lista de operarios asignados a la máquina
+                maquinas[maquinaIndex].operariosAsignados = maquinas[maquinaIndex].operariosAsignados.filter(idOperario => idOperario !== index);
+                localStorage.setItem('maquinas', JSON.stringify(maquinas));
+            }
+        }
     }
 
     // Agregar un nuevo operario.
@@ -100,6 +111,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (nombreOperario && maquinaSeleccionada) {
             const operarios = getOperarios();
+            // Verifica si ya existe un operario con el mismo nombre
+            const operarioExistente = operarios.find(o => o.nombre === nombreOperario);
+            if (operarioExistente) {
+                alert("Ya existe un operario con este nombre. Por favor, elija un nombre diferente.");
+                return; // Detiene la ejecución si el nombre ya existe
+            }
             operarios.push({ nombre: nombreOperario, maquina: maquinaSeleccionada });
             saveOperarios(operarios);
             nombreOperarioInput.value = '';
@@ -195,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function () {
         operarioIndex = index;
         const operario = operarios[index];
         editNombreOperarioInput.value = operario.nombre;
-        updateEditMaquinasSelect(operario.maquina)
+        updateEditMaquinasSelect(operario.maquina);
     }
 
     editarOperarioForm.addEventListener('submit', (e) => {
@@ -211,6 +228,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const modal = bootstrap.Modal.getInstance(editarOperarioModal);
         modal.hide();
     });
+
+
+    function obtenerNombreMaquinaPorId(maquinaId) {
+        const maquinas = getMaquinas(); // Obtiene el array de máquinas
+        const maquina = maquinas.find(m => m.id === maquinaId); // Busca la máquina por ID
+        return maquina ? maquina.nombre : 'No asignada'; // Devuelve el nombre o 'No asignada'
+    }
 
     function updateEditMaquinasSelect(maquinaSeleccionada) {
         editMaquinaSelect.innerHTML = '';

@@ -436,7 +436,7 @@ function desasignarOperario(operarioId, maquinaId) {
         const maquinaIndex = maquinas.findIndex(m => m.id === maquinaActualId);
         if (maquinaIndex === -1) return;
 
-        const nombreAnterior = maquinas[maquinaIndex].nombre;  //Guardo el nombre anterior
+        const nombreAnterior = maquinas[maquinaIndex].nombre;
         maquinas[maquinaIndex].nombre = nombre;
         localStorage.setItem('maquinas', JSON.stringify(maquinas));
 
@@ -450,7 +450,7 @@ function desasignarOperario(operarioId, maquinaId) {
         actualizarTablaMaquinas();
 
         if (window.gestionOperarios) {
-            window.gestionOperarios.actualizarTablaOperarios();
+            window.gestionOperarios.sincronizarConModuloMaquinas();
         }
 
         if (nombreAnterior !== nombre) {
